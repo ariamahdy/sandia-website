@@ -31,3 +31,14 @@ test('e2e projects start at a fixed window size that headed runs then maximize',
     });
   }
 });
+
+test('e2e projects skip @mutating tests', () => {
+  const e2e = buildProjects({ aut: 'uat', hasPrivate: true }).find((p) => p.name === 'uat-e2e');
+  expect(e2e?.grepInvert).toEqual(/@mutating/);
+});
+
+test('the mutating project is registered only when asked for', () => {
+  expect(names('uat', true)).not.toContain('uat-mutating');
+  const mutating = buildProjects({ aut: 'uat', hasPrivate: true, mutating: true }).find((p) => p.name === 'uat-mutating');
+  expect(mutating).toMatchObject({ testDir: 'private/tests/e2e/uat', grep: /@mutating/ });
+});

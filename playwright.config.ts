@@ -6,6 +6,7 @@ import { buildProjects } from '@config/projects';
 loadEnvFile(envFileFor());
 const env = loadEnv();
 const ci = Boolean(process.env.CI);
+const mutating = process.env.npm_lifecycle_event === 'test:uat:mutating';
 const reporter: ReporterDescription[] = [['list'], ['html', { open: 'never' }]];
 
 export default defineConfig({
@@ -22,5 +23,5 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
   },
-  projects: [...buildProjects({ aut: env.AUT, hasPrivate: existsSync('private') })],
+  projects: [...buildProjects({ aut: env.AUT, hasPrivate: existsSync('private'), mutating })],
 });

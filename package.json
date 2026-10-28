@@ -17,6 +17,7 @@
     "test:api": "playwright test --project=conduit-api",
     "test:stability": "playwright test --repeat-each=5 --workers=4 --project=conduit-api --project=conduit-e2e",
     "test:uat": "node --env-file=private/.env node_modules/@playwright/test/cli.js test --project=uat-e2e",
+    "test:uat:mutating": "node --env-file=private/.env node_modules/@playwright/test/cli.js test --project=uat-mutating --workers=1",
     "aut:up": "docker compose -f infra/conduit/compose.yml --env-file .env up -d --build --wait",
     "aut:down": "docker compose -f infra/conduit/compose.yml --env-file .env down -v",
     "guard": "node scripts/guard.mjs",
