@@ -32,6 +32,7 @@ All base images are pinned by multi-arch index digest in `compose.yml`.
 **Facts the framework relies on:**
 - `BASE_URL=http://localhost:$CONDUIT_PORT`, `API_URL=$BASE_URL/api`. Only `127.0.0.1` is bound.
 - Auth header: `Authorization: Token <jwt>` (RealWorld spec). The backend also accepts `Bearer`.
+- Status codes: wrong login credentials return `403`; blank email or password `422`; missing article `404`; no token `401`.
 - The frontend stores the JWT in `localStorage` under the key `jwtToken`.
 - Endpoints: `/users`, `/users/login`, `/user`, `/articles`, `/articles/:slug`, `/tags` under `/api`.
 
