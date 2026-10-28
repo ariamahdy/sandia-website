@@ -1,0 +1,9 @@
+node_modules/
+private/
+.auth/
+.env*
+!.env.example
+playwright-report/
+test-results/
+blob-report/
+.DS_Store

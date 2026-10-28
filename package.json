@@ -1,0 +1,38 @@
+{
+  "name": "sandia-website",
+  "version": "1.0.0",
+  "private": true,
+  "license": "ISC",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=26.12.1 <27"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --max-warnings=0",
+    "verify:lint": "node scripts/verify-lint-rules.mjs",
+    "test": "playwright test",
+    "test:unit": "playwright test --project=unit",
+    "test:e2e": "playwright test --project=conduit-e2e",
+    "test:api": "playwright test --project=conduit-api",
+    "test:stability": "playwright test --repeat-each=5 --workers=4 --project=conduit-api --project=conduit-e2e",
+    "aut:up": "docker compose -f infra/conduit/compose.yml --env-file .env up -d --wait",
+    "aut:down": "docker compose -f infra/conduit/compose.yml --env-file .env down -v",
+    "guard": "node scripts/guard.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.64.1",
+    "@types/node": "26.6.5",
+    "eslint": "10.13.0",
+    "eslint-plugin-playwright": "2.12.1",
+    "jiti": "2.7.0",
+    "lint-staged": "17.6.0",
+    "simple-git-hooks": "2.14.0",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.72.1"
+  },
+  "dependencies": {
+    "zod": "4.6.7"
+  }
+}

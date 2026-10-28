@@ -6,7 +6,7 @@
 
 **Architecture:** Layered `config <- utils <- api/components <- pages <- fixtures <- tests`, enforced by ESLint `no-restricted-imports`. Fixtures inject everything; tests call atomic actions inside `test.step`. Data is created and removed through API clients; auth uses a `setup` project writing `storageState`.
 
-**Tech Stack:** Node 22 LTS, `@playwright/test` 1.64.1, TypeScript 6.0.3, typescript-eslint 8.72.1, ESLint 10.13.0, eslint-plugin-playwright 2.12.1, zod 4.6.7, simple-git-hooks 2.14.0, lint-staged 17.6.0, jiti 2.7.0.
+**Tech Stack:** Node 26 LTS, `@playwright/test` 1.64.1, TypeScript 6.0.3, typescript-eslint 8.72.1, ESLint 10.13.0, eslint-plugin-playwright 2.12.1, zod 4.6.7, simple-git-hooks 2.14.0, lint-staged 17.6.0, jiti 2.7.0.
 
 **Spec:** `docs/superpowers/specs/2026-10-28-playwright-ts-framework-design.md`
 
@@ -18,7 +18,7 @@
 - Tests import `test`/`expect` only from `@fixtures/conduit` (exception: `tests/unit/**`, which imports `@playwright/test`).
 - Locator priority: `getByRole` > `getByLabel` > `getByTestId` > `getByText` > CSS; XPath last resort with reason. Web-first assertions. No `waitForTimeout`.
 - No hard-coded URLs or secrets; everything from env.
-- Exact versions pinned: `.npmrc` `save-exact=true`, `engines.node` `>=22.22.1 <23`, `.nvmrc` `22`, lockfile committed, `npm ci`.
+- Exact versions pinned: `.npmrc` `save-exact=true`, `engines.node` `>=26.12.1 <27`, `.nvmrc` `26`, lockfile committed, `npm ci`.
 - TypeScript is pinned to 6.0.3, not the newest release, because typescript-eslint 8.72.1 declares peer `typescript >=4.8.4 <6.1.0`.
 - Definition of done per task: `npm run typecheck` 0 errors, `npm run lint` 0 errors/warnings, affected tests pass; from Task 10 on also `npm run test:stability`.
 - Docker exists only on the personal laptop. Only Task 4 and the Conduit suites need it.
@@ -61,7 +61,7 @@ Expected: FAIL (no ESLint config yet).
 
 - [ ] **Step 3: Install and configure**
 
-`npm i -D -E` the Tech Stack packages plus `@eslint/js@^10` and `@types/node@22`; `npm i -E zod@4.6.7`. Write `tsconfig.json` (module `NodeNext` unless Playwright resolution requires otherwise; verify with Task 3 smoke), `eslint.config.ts` using `typescript-eslint` strict type-checked + `eslint-plugin-playwright` rules: `no-wait-for-timeout`, `no-force-option`, `no-nth-methods`, `missing-playwright-await`, `expect-expect`, `no-conditional-in-test`, `valid-title`, `no-networkidle`, `no-skipped-test`, `no-focused-test` (rule names verified present in eslint-plugin-playwright 2.12.1). Layer rules via per-directory `no-restricted-imports` overrides encoding the DAG.
+`npm i -D -E` the Tech Stack packages plus `@eslint/js@^10` and `@types/node@26`; `npm i -E zod@4.6.7`. Write `tsconfig.json` (module `NodeNext` unless Playwright resolution requires otherwise; verify with Task 3 smoke), `eslint.config.ts` using `typescript-eslint` strict type-checked + `eslint-plugin-playwright` rules: `no-wait-for-timeout`, `no-force-option`, `no-nth-methods`, `missing-playwright-await`, `expect-expect`, `no-conditional-in-test`, `valid-title`, `no-networkidle`, `no-skipped-test`, `no-focused-test` (rule names verified present in eslint-plugin-playwright 2.12.1). Layer rules via per-directory `no-restricted-imports` overrides encoding the DAG.
 
 - [ ] **Step 4: Run `npm run verify:lint && npm run typecheck && npm run lint`**
 
@@ -80,7 +80,7 @@ Expected: all pass.
 **Interfaces:**
 - Produces: `type Env = { AUT: 'conduit' | 'uat'; BASE_URL: string; API_URL: string } & ({ AUT: 'conduit' } | { AUT: 'uat'; AUTH_USERNAME: string; AUTH_PASSWORD: string })` (zod discriminated union on `AUT`).
 - Produces: `class ConfigError extends Error { readonly issues: readonly string[] }`
-- Produces: `loadEnv(source?: NodeJS.ProcessEnv): Env` (pure, defaults to `process.env`), `loadEnvFile(path: string): void` (calls `process.loadEnvFile` only if the file exists; verified present on Node 22.22.2), `env: Env` exported from `@config` (evaluated on import, fail fast).
+- Produces: `loadEnv(source?: NodeJS.ProcessEnv): Env` (pure, defaults to `process.env`), `loadEnvFile(path: string): void` (calls `process.loadEnvFile` only if the file exists; verified present on Node 26.12.1), `env: Env` exported from `@config` (evaluated on import, fail fast).
 
 - [ ] **Step 1: Write failing tests** in `tests/unit/config/env.spec.ts`, then run `npx playwright test tests/unit/config --project=unit` -> FAIL (module missing). Tests:
   - valid conduit env returns `{ AUT: 'conduit', BASE_URL, API_URL }`

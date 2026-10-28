@@ -27,7 +27,7 @@ Execute the plan task by task, in order. Do not skip the failing-test step. Comm
 
 ## Environment
 - Docker only on the personal laptop. Task 4 and the Conduit suites need it. Tasks 1-3, 5, 6 run without it.
-- Node 22 LTS (`.nvmrc`). TypeScript pinned to 6.0.3 on purpose (typescript-eslint peer range).
+- Node 26 LTS (`.nvmrc`). TypeScript pinned to 6.0.3 on purpose (typescript-eslint peer range).
 
 ## Bug fixes
 Root cause first (locator strictness, actionability, race, isolation, shared worker state, data, env, typing). Report: root cause -> fix -> how to verify -> regression risk.
