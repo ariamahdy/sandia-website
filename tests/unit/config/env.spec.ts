@@ -38,10 +38,19 @@ test('result is frozen', () => {
 });
 
 test('uat loads its settings from private/.env', () => {
-  expect(envFileFor({ AUT: 'uat' })).toBe('private/.env');
+  expect(envFileFor({ AUT: 'uat' }, {})).toBe('private/.env');
 });
 
 test('any other AUT loads .env', () => {
-  expect(envFileFor({})).toBe('.env');
-  expect(envFileFor({ AUT: 'conduit' })).toBe('.env');
+  expect(envFileFor({}, {})).toBe('.env');
+  expect(envFileFor({ AUT: 'conduit' }, {})).toBe('.env');
+});
+
+test('AUT=uat in the root .env selects private/.env when the shell has no AUT', () => {
+  expect(envFileFor({}, { AUT: 'uat' })).toBe('private/.env');
+});
+
+test('AUT from the shell wins over the root .env', () => {
+  expect(envFileFor({ AUT: 'conduit' }, { AUT: 'uat' })).toBe('.env');
+  expect(envFileFor({ AUT: 'uat' }, { AUT: 'conduit' })).toBe('private/.env');
 });
