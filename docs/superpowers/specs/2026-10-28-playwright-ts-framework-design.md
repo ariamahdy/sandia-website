@@ -38,7 +38,6 @@ Decision: single public repo with a git-ignored `private/` directory that is its
     fixtures/      base.ts, conduit.ts
     data/conduit/  userFactory, articleFactory
   tests/
-    setup/         auth.setup.ts
     e2e/conduit/<feature>/
     api/conduit/<feature>/
   infra/conduit/   compose.yml
@@ -71,7 +70,7 @@ Residual risk (manual discipline, not toolable): core changes discovered while w
 
 ## 4. Authentication and isolation
 
-- `setup` project (`tests/setup/auth.setup.ts`) logs in via UI once per run and writes `storageState` to `.auth/<aut>.json` (gitignored). E2E projects use `dependencies: ['setup']`. No stale state reuse.
+- Per-worker auth (Playwright "one account per parallel worker"): a worker-scoped fixture registers the worker's user via API, logs in once through the UI (`LoginPage`) and writes `storageState` to `.auth/<aut>-<parallelIndex>.json` (gitignored); the `storageState` fixture points to it. Browser, API clients and teardown act as the same user. Regenerated every run, no stale state reuse. A shared `setup` project was rejected: it signs the browser in as a different user than the per-worker API user.
 - Conduit adapter registers a unique user per worker via API (worker-scoped fixture), so there are no shared credentials and no manual seed.
 - API project uses a worker-scoped fixture that obtains a token through the request context; no storageState.
 - Isolation rules: every test creates its own data via API using factory-generated unique values and removes it in fixture teardown. No order dependence, no shared mutable state, parallel-safe. Tests that mutate user-level state (profile, follow, settings) use the per-worker user.
@@ -97,14 +96,14 @@ Data: factories use `crypto.randomUUID()` for unique values. No faker until real
 - `fullyParallel: true`, `forbidOnly` in CI, local `retries: 0`, CI `retries: 1` used only for flake detection. A test passing on retry is reported `flaky` and treated as a quality failure.
 - `trace: 'on-first-retry'`, `screenshot: 'only-on-failure'`, `video: 'retain-on-failure'`. Reporters: `list` + `html`; CI adds `junit`.
 - Explicit small timeouts (`expect`, `actionTimeout`, `navigationTimeout`). Raising timeouts is not a fix for flakiness.
-- Projects: `setup`, `conduit-e2e` (chromium, depends on `setup`), `conduit-api` (no browser, no storageState), `uat-*` registered only when `private/` exists and `AUT=uat`.
+- Projects: `unit`, `conduit-e2e` (chromium), `conduit-api` (no browser, no storageState), `uat-*` registered only when `private/` exists and `AUT=uat`.
 - AUT lifecycle: no `webServer` (Playwright requires `webServer.command` and applies it to every project, which would block `unit`). Containers are started explicitly with `npm run aut:up` (`docker compose up --wait` on healthchecks) / `aut:down`; CI waits with `scripts/aut-wait.mjs`.
 
 ## 7. Tooling and quality gates
 
 - `tsconfig`: `strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `noImplicitOverride`, `paths` aliases.
 - ESLint flat config: `typescript-eslint` strict type-checked + `eslint-plugin-playwright`. Rules to enable (names checked against pinned plugin version): `no-wait-for-timeout`, `no-force-option`, `no-nth-methods`, `missing-playwright-await`, `expect-expect`, `no-conditional-in-test`, `valid-title`.
-- Layering via per-directory `no-restricted-imports` overrides. Also forbidden: `any`, `@playwright/test` outside `src/fixtures`, `@uat/*` from core.
+- Layering via per-directory `no-restricted-imports` overrides. Also forbidden: `any`, `@uat/*` from core, and `@playwright/test` outside `src/fixtures` except type imports everywhere and `expect` in `src/components`/`src/pages` (needed by web-first `verify*`).
 - Known gap: "every action wrapped in `test.step`" is not enforceable by stock lint rules. Enforced by review; custom rule only if violations recur.
 - Hooks: `simple-git-hooks` + `lint-staged`. Pre-commit: `tsc --noEmit` + ESLint. Pre-push: `scripts/guard`.
 - Reproducibility: exact versions pinned (`save-exact=true`), `engines` + `.nvmrc`, committed lockfile, `npm ci`.

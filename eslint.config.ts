@@ -5,12 +5,18 @@ import playwright from 'eslint-plugin-playwright';
 import tseslint from 'typescript-eslint';
 
 type Layer = 'config' | 'utils' | 'api' | 'components' | 'data' | 'pages' | 'fixtures';
-type RestrictedPath = { name: string; message: string; allowTypeImports?: boolean };
+type RestrictedPath = { name: string; message: string; allowTypeImports?: boolean; allowImportNames?: string[] };
 
 const playwrightTypesOnly: RestrictedPath = {
   name: '@playwright/test',
   allowTypeImports: true,
   message: 'Only type imports from @playwright/test outside src/fixtures.',
+};
+const playwrightExpectOnly: RestrictedPath = {
+  name: '@playwright/test',
+  allowTypeImports: true,
+  allowImportNames: ['expect'],
+  message: 'Components and pages may import only expect and types from @playwright/test.',
 };
 const playwrightBanned: RestrictedPath = {
   name: '@playwright/test',
@@ -57,7 +63,7 @@ export default defineConfig(
       'playwright/no-force-option': 'error',
       'playwright/no-nth-methods': 'error',
       'playwright/missing-playwright-await': 'error',
-      'playwright/expect-expect': 'error',
+      'playwright/expect-expect': ['error', { assertFunctionPatterns: ['^verify'] }],
       'playwright/no-conditional-in-test': 'error',
       'playwright/valid-title': 'error',
       'playwright/no-networkidle': 'error',
@@ -68,9 +74,9 @@ export default defineConfig(
   restrict(['src/config/**/*.ts'], ['utils', 'api', 'components', 'data', 'pages', 'fixtures']),
   restrict(['src/utils/**/*.ts'], ['api', 'components', 'data', 'pages', 'fixtures']),
   restrict(['src/api/**/*.ts'], ['components', 'pages', 'fixtures']),
-  restrict(['src/components/**/*.ts'], ['api', 'pages', 'fixtures']),
+  restrict(['src/components/**/*.ts'], ['api', 'pages', 'fixtures'], [playwrightExpectOnly]),
   restrict(['src/data/**/*.ts'], ['api', 'components', 'pages', 'fixtures']),
-  restrict(['src/pages/**/*.ts'], ['fixtures']),
+  restrict(['src/pages/**/*.ts'], ['fixtures'], [playwrightExpectOnly]),
   restrict(['src/fixtures/**/*.ts'], [], []),
   { files: ['src/fixtures/**/*.ts'], rules: { '@typescript-eslint/no-generated-empty-object-type': 'off' } },
   restrict(['tests/**/*.ts'], ['api', 'components', 'pages'], [playwrightBanned]),

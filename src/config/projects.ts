@@ -4,13 +4,7 @@ import { ConfigError, type Env } from './env';
 type BuildOptions = { aut: Env['AUT']; hasPrivate: boolean };
 
 const autProjects = (aut: Env['AUT'], root: string): Project[] => [
-  { name: 'setup', testDir: `${root}/setup`, testMatch: '**/*.setup.ts' },
-  {
-    name: `${aut}-e2e`,
-    testDir: `${root}/e2e/${aut}`,
-    dependencies: ['setup'],
-    use: { browserName: 'chromium', storageState: `.auth/${aut}.json` },
-  },
+  { name: `${aut}-e2e`, testDir: `${root}/e2e/${aut}`, use: { browserName: 'chromium' } },
   { name: `${aut}-api`, testDir: `${root}/api/${aut}` },
 ];
 

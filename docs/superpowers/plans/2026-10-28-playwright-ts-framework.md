@@ -106,12 +106,12 @@ Expected: all pass.
 **Interfaces:**
 - Consumes: `env`, `loadEnvFile` from `@config`.
 - Produces: `buildProjects(opts: { aut: Env['AUT']; hasPrivate: boolean }): readonly Project[]` in `src/config/projects.ts` (pure; throws `ConfigError` with message containing `private/` when `aut === 'uat' && !hasPrivate`, Review Focus 2).
-- Projects: `unit` (`testDir: tests/unit`), `setup` (`testMatch: tests/setup/*.setup.ts`), `conduit-e2e` (chromium, `dependencies: ['setup']`, `testDir: tests/e2e/conduit`, `storageState: .auth/conduit.json`), `conduit-api` (`testDir: tests/api/conduit`, no browser), `uat-e2e`/`uat-api` only when `private/` exists and `AUT=uat` (testDirs under `private/tests`).
+- Projects: `unit` (`testDir: tests/unit`), `conduit-e2e` (chromium, `testDir: tests/e2e/conduit`), `conduit-api` (`testDir: tests/api/conduit`, no browser), `uat-e2e`/`uat-api` only when `private/` exists and `AUT=uat` (testDirs under `private/tests`). No `setup` project: auth is per worker (spec section 4).
 - Global config: `fullyParallel: true`, `forbidOnly: !!process.env.CI`, `retries: process.env.CI ? 1 : 0`, `trace: 'on-first-retry'`, `screenshot: 'only-on-failure'`, `video: 'retain-on-failure'`, reporters `list`+`html` (+`junit` in CI), explicit `expect.timeout`, `actionTimeout`, `navigationTimeout` (values chosen small, recorded in the file). No `webServer` (spec section 6).
 
 - [ ] **Step 1: Write failing tests** `projects.spec.ts`:
-  - `buildProjects({aut:'conduit',hasPrivate:false})` names equal `['unit','setup','conduit-e2e','conduit-api']`
-  - `conduit-e2e` has `dependencies` equal `['setup']`
+  - `buildProjects({aut:'conduit',hasPrivate:false})` names equal `['unit','conduit-e2e','conduit-api']`
+  - `conduit-e2e` runs in chromium
   - `buildProjects({aut:'uat',hasPrivate:false})` throws `ConfigError` matching `/private\//`
   - `buildProjects({aut:'uat',hasPrivate:true})` includes `uat-e2e` and `uat-api`
 
@@ -237,7 +237,7 @@ Expected: all pass.
 **Files:**
 - Create: `src/components/{navbar,article-list,pagination,error-list}.component.ts`, `src/components/index.ts`
 - Create: `src/pages/conduit/{login,register,home,editor,article,settings}.page.ts`, `src/pages/conduit/index.ts`
-- Modify: `src/fixtures/conduit.ts` (add page and component fixtures)
+- Modify: `src/fixtures/conduit.ts` (add page and component fixtures, per-worker `workerStorageState` + `storageState` override per spec section 4)
 
 **Interfaces:**
 - Components take `constructor(root: Locator)`; expose only locators, `verify*`, atomic actions. Required members:
@@ -250,21 +250,21 @@ Expected: all pass.
 - Locators prefer `getByRole`/`getByLabel`/`getByPlaceholder`; any `getByTestId`/CSS/XPath choice carries its reason in the commit message (no code comments).
 
 - [ ] **Step 1: Write the failing UI test** `tests/e2e/conduit/smoke/home.spec.ts`: `E2E-HOME-001 home page loads signed in`: `homePage.goto()` then `homePage.navbar.verifySignedIn(workerUser.username)`.
-- [ ] **Step 2: Run** `npx playwright test tests/e2e/conduit/smoke --project=conduit-e2e` -> FAIL (needs Task 10's setup; run once Step 3 of Task 10 exists, or temporarily with `--project=conduit-e2e --no-deps` after seeding storageState by hand).
+- [ ] **Step 2: Run** `npx playwright test tests/e2e/conduit/smoke --project=conduit-e2e` -> FAIL (module missing).
 - [ ] **Step 3: Implement** components, pages, fixtures per Interfaces.
-- [ ] **Step 4: Run** after Task 10 -> PASS; typecheck + lint.
+- [ ] **Step 4: Run** -> PASS (needs `aut:up`); typecheck + lint.
 - [ ] **Step 5: Commit** `feat: components, pages and UI fixtures`
 
 ---
 
-### Task 10: Auth setup and E2E suite
+### Task 10: E2E suite
 
 **Files:**
-- Create: `tests/setup/auth.setup.ts`, `tests/e2e/conduit/articles/article-lifecycle.spec.ts`, `tests/e2e/conduit/auth/login.spec.ts`
+- Create: `tests/e2e/conduit/articles/article-lifecycle.spec.ts`, `tests/e2e/conduit/auth/login.spec.ts`
 - Modify: `.gitignore` (`.auth/`)
 
 **Interfaces:**
-- `auth.setup.ts` (project `setup`): registers a unique user via `AuthClient`, logs in through `LoginPage` (UI, per spec section 4), `page.context().storageState({ path: '.auth/conduit.json' })`. The UI login must be driven through fixtures, so `setup` files import `test` from `@fixtures/conduit`.
+- Auth comes from Task 9's per-worker `storageState` fixture (spec section 4); there is no `setup` project.
 - `login.spec.ts` overrides `storageState: { cookies: [], origins: [] }` for its tests.
 
 - [ ] **Step 1: Write failing tests**
@@ -273,9 +273,9 @@ Expected: all pass.
   - `E2E-ART-001 create article via UI then see it on its page`: new article via `editorPage` atomic actions (one `test.step` per fill/click), `articlePage.verifyTitle(title)`; the UI-created slug is read from the page URL and passed to `trackArticle(slug)` so fixture teardown removes it
   - `E2E-ART-002 article created via API appears in the list`: uses the `article` fixture, opens home, `articleList.verifyContainsTitle(article.title)`
 - [ ] **Step 2: Run** `npx playwright test --project=conduit-e2e` -> FAIL.
-- [ ] **Step 3: Implement** setup and the `trackArticle: (slug: string) => void` fixture in `conduit.ts` (teardown removes tracked slugs, tolerating 404).
+- [ ] **Step 3: Implement** the `trackArticle: (slug: string) => void` fixture in `conduit.ts` (teardown removes tracked slugs, tolerating 404).
 - [ ] **Step 4: Run** `npm run test:stability` -> PASS with 0 flaky; open the HTML report and confirm every action appears as a step. Also Task 9 Step 4.
-- [ ] **Step 5: Commit** `test: auth setup and conduit E2E suite`
+- [ ] **Step 5: Commit** `test: conduit E2E suite`
 
 ---
 

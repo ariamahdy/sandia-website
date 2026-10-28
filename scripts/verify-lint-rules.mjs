@@ -16,9 +16,21 @@ const cases = [
     expect: '@typescript-eslint/no-restricted-imports',
   },
   {
-    name: 'pages must not import @playwright/test values',
+    name: 'pages must not import test from @playwright/test',
     filePath: 'src/pages/x.ts',
-    code: "import { expect } from '@playwright/test';\nexport const e = expect;\n",
+    code: "import { test } from '@playwright/test';\nexport const t = test;\n",
+    expect: '@typescript-eslint/no-restricted-imports',
+  },
+  {
+    name: 'pages may import expect from @playwright/test',
+    filePath: 'src/pages/x.ts',
+    code: "import { expect, type Locator } from '@playwright/test';\nexport const verify = (l: Locator) => expect(l).toBeVisible();\n",
+    expect: null,
+  },
+  {
+    name: 'api must not import @playwright/test values',
+    filePath: 'src/api/x.ts',
+    code: "import { request } from '@playwright/test';\nexport const r = request;\n",
     expect: '@typescript-eslint/no-restricted-imports',
   },
   {
@@ -38,6 +50,12 @@ const cases = [
     filePath: 'tests/e2e/x.spec.ts',
     code: "import { test } from '@fixtures/conduit';\ntest('waits', async ({ page }) => {\n  await page.waitForTimeout(1);\n});\n",
     expect: 'playwright/no-wait-for-timeout',
+  },
+  {
+    name: 'test without assertion or verify call is flagged',
+    filePath: 'tests/e2e/x.spec.ts',
+    code: "import { test } from '@fixtures/conduit';\ntest('no assertion', async ({ homePage }) => {\n  await homePage.goto();\n});\n",
+    expect: 'playwright/expect-expect',
   },
   {
     name: 'explicit any is banned',
