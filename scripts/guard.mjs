@@ -1,0 +1,50 @@
+import { execFileSync } from 'node:child_process';
+import { existsSync, lstatSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+const root = execFileSync('git', ['rev-parse', '--show-toplevel'], { encoding: 'utf8' }).trim();
+const gitFiles = (...args) =>
+  execFileSync('git', ['ls-files', '-z', ...args], { cwd: root, encoding: 'utf8' }).split('\0').filter(Boolean);
+
+const denylistFiles = ['scripts/guard.denylist.txt', 'private/guard.denylist.txt'];
+const patterns = denylistFiles
+  .map((file) => join(root, file))
+  .filter((path) => existsSync(path))
+  .flatMap((path) => readFileSync(path, 'utf8').split('\n'))
+  .map((line) => line.trim())
+  .filter((line) => line !== '' && !line.startsWith('#'))
+  .map((line) => new RegExp(line, 'i'));
+
+const problems = [];
+
+for (const file of gitFiles('--', 'private')) {
+  problems.push(`${file}: private/ must never be tracked`);
+}
+
+const tracked = gitFiles();
+
+for (const file of tracked) {
+  if (/(^|\/)\.env($|\.)/.test(file) && !file.endsWith('.env.example')) {
+    problems.push(`${file}: env files other than .env.example must never be tracked`);
+  }
+}
+
+for (const file of tracked) {
+  const path = join(root, file);
+  if (denylistFiles.includes(file) || !existsSync(path) || !lstatSync(path).isFile()) continue;
+  const content = readFileSync(path);
+  if (content.includes(0)) continue;
+  content
+    .toString('utf8')
+    .split('\n')
+    .forEach((line, index) => {
+      const hit = patterns.find((pattern) => pattern.test(line));
+      if (hit) problems.push(`${file}:${String(index + 1)}: matches denylist pattern /${hit.source}/`);
+    });
+}
+
+if (problems.length > 0) {
+  console.error(`guard: ${String(problems.length)} problem(s)\n${problems.join('\n')}`);
+  process.exit(1);
+}
+console.log(`guard: ok (${String(tracked.length)} tracked files, ${String(patterns.length)} denylist patterns)`);
