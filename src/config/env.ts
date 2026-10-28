@@ -1,4 +1,5 @@
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
+import { parseEnv } from 'node:util';
 import { z } from 'zod';
 
 const common = { BASE_URL: z.url(), API_URL: z.url() };
@@ -31,5 +32,9 @@ export const loadEnvFile = (path: string): void => {
   if (existsSync(path)) process.loadEnvFile(path);
 };
 
-export const envFileFor = (source: NodeJS.ProcessEnv = process.env): string =>
-  source['AUT'] === 'uat' ? 'private/.env' : '.env';
+const readEnvFile = (path: string): NodeJS.Dict<string> => (existsSync(path) ? parseEnv(readFileSync(path, 'utf8')) : {});
+
+export const envFileFor = (
+  source: NodeJS.ProcessEnv = process.env,
+  rootEnv: NodeJS.Dict<string> = readEnvFile('.env'),
+): string => ((source['AUT'] ?? rootEnv['AUT']) === 'uat' ? 'private/.env' : '.env');
