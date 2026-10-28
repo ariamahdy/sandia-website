@@ -16,3 +16,6 @@ export const lastDayOf = (ym: YearMonth): string =>
 
 export const monthLabel = ({ year, month }: YearMonth): string =>
   new Date(year, month - 1, 1).toLocaleString('en-US', { month: 'short' });
+
+export const indonesianMonthName = ({ year, month }: YearMonth): string =>
+  new Date(year, month - 1, 1).toLocaleString('id-ID', { month: 'long' }).toUpperCase();
