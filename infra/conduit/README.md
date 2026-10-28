@@ -37,4 +37,4 @@ All base images are pinned by multi-arch index digest in `compose.yml`.
 - UI error text for wrong login credentials: `email or password is invalid` (rendered in `.error-messages`).
 - Endpoints: `/users`, `/users/login`, `/user`, `/articles`, `/articles/:slug`, `/tags` under `/api`.
 
-**Fallback:** if this pair becomes unstable and causes AUT-induced flakiness, replace it with a deterministic mock AUT in `infra/conduit/mock/` (spec section 8).
+**Fallback:** if this pair becomes unstable and causes AUT-induced flakiness, replace it with a deterministic mock AUT in `infra/conduit/mock/`.

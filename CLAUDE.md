@@ -3,8 +3,12 @@
 Greenfield Playwright Test + TypeScript (strict) framework, web UI + API. Not a Katalon migration.
 
 ## Source of truth
-- Spec: `docs/superpowers/specs/2026-10-28-playwright-ts-framework-design.md`. AUT facts: `infra/conduit/README.md`.
-Write the failing test first. Commit after each change. If a change conflicts with the spec, stop and ask.
+- Architecture and rules: `README.md` and this file. AUT facts: `infra/conduit/README.md`.
+Write the failing test first. Commit after each change. If a change conflicts with these, stop and ask.
+
+## Scope
+- Out of scope (YAGNI): Katalon mapping, multi-browser, visual regression, custom reporters, logging wrappers, retry/wait utilities, self-hosted UAT CI runner.
+- Playwright built-ins first (reporters, trace, `test.step`, `expect.poll`/`toPass`, `expect.soft`, projects, fixtures). Custom code only when a built-in is proven insufficient, with the reason stated.
 
 ## Rules (apply to every change)
 - Layering, no cycles: `config <- utils <- data <- api/components <- pages <- fixtures <- tests`. Flag any change that breaks it.
@@ -18,6 +22,8 @@ Write the failing test first. Commit after each change. If a change conflicts wi
 - Strict types, no `any`, ESLint-clean, compact, no code comments.
 - Never invent Playwright APIs; check the docs when unsure and say so.
 - Public repo must never contain company UAT details. `private/` is gitignored and is its own git repo.
+- Core changes found while working on UAT go into this repo, never into `private/` (not toolable, manual discipline).
+- `test.step` per action is not lint-enforced; check it in review.
 
 ## Definition of done
 - `npm run typecheck`: 0 errors. `npm run lint`: 0 errors/warnings.
@@ -26,6 +32,7 @@ Write the failing test first. Commit after each change. If a change conflicts wi
 
 ## Environment
 - Docker only on the personal laptop. The Conduit API/E2E suites need it; typecheck, lint and unit tests run without it.
+- Company laptop: no Docker, runs only `AUT=uat`. UAT values live in `private/.env` (`AUTH_USERNAME`, `AUTH_PASSWORD`).
 - Node 26 LTS (`.nvmrc`). TypeScript pinned to 6.0.3 on purpose (typescript-eslint peer range).
 
 ## Bug fixes
