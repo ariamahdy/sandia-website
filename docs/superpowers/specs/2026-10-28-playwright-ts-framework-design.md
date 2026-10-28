@@ -47,7 +47,7 @@ Decision: single public repo with a git-ignored `private/` directory that is its
   playwright.config.ts  tsconfig.json  eslint.config.ts  .env.example  .nvmrc  .npmrc
 ```
 
-Layering (enforced, no cycles): `config <- utils <- api/components <- pages <- fixtures <- tests`. `private/` follows the same layering and imports only one way: `private -> core`.
+Layering (enforced, no cycles): `config <- utils <- data <- api/components <- pages <- fixtures <- tests`. `private/` follows the same layering and imports only one way: `private -> core`.
 
 Path aliases in tsconfig: `@config`, `@utils`, `@api`, `@components`, `@pages`, `@fixtures`, `@data`, `@uat/*` (-> `private/*`). No deep relative imports.
 

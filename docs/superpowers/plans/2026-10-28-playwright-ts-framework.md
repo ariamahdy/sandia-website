@@ -4,7 +4,7 @@
 
 **Goal:** Build a production-grade Playwright + TypeScript (strict) web UI + API framework whose AUT-agnostic core is proven against a self-hosted Conduit AUT, with a gitignored `private/` extension point for company UAT.
 
-**Architecture:** Layered `config <- utils <- api/components <- pages <- fixtures <- tests`, enforced by ESLint `no-restricted-imports`. Fixtures inject everything; tests call atomic actions inside `test.step`. Data is created and removed through API clients; auth uses a `setup` project writing `storageState`.
+**Architecture:** Layered `config <- utils <- data <- api/components <- pages <- fixtures <- tests`, enforced by ESLint `no-restricted-imports`. Fixtures inject everything; tests call atomic actions inside `test.step`. Data is created and removed through API clients; auth uses a `setup` project writing `storageState`.
 
 **Tech Stack:** Node 26 LTS, `@playwright/test` 1.64.1, TypeScript 6.0.3, typescript-eslint 8.72.1, ESLint 10.13.0, eslint-plugin-playwright 2.12.1, zod 4.6.7, simple-git-hooks 2.14.0, lint-staged 17.6.0, jiti 2.7.0.
 
@@ -13,7 +13,7 @@
 ## Global Constraints
 
 - Strict TS: `strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `noImplicitOverride`. No `any`. No code comments.
-- Layering (no cycles): `config <- utils <- api/components <- pages <- fixtures <- tests`. Core never imports `@uat/*` or `private/`.
+- Layering (no cycles): `config <- utils <- data <- api/components <- pages <- fixtures <- tests`. Core never imports `@uat/*` or `private/`.
 - Aliases: `@config`, `@utils`, `@api`, `@components`, `@pages`, `@fixtures`, `@data`, `@uat/*` (-> `private/*`). No deep relative imports.
 - Tests import `test`/`expect` only from `@fixtures/conduit` (exception: `tests/unit/**`, which imports `@playwright/test`).
 - Locator priority: `getByRole` > `getByLabel` > `getByTestId` > `getByText` > CSS; XPath last resort with reason. Web-first assertions. No `waitForTimeout`.
@@ -175,7 +175,7 @@ Expected: all pass.
 - Consumes: `NewUser`, `NewArticle` (`@data`), `Env` (`@config`).
 - Produces: `class ApiError extends Error { readonly endpoint: string; readonly status: number }`; `class ContractError extends Error { readonly endpoint: string; readonly issues: readonly string[] }`.
 - Produces: `async function parseResponse<T>(endpoint: string, response: APIResponse, schema: z.ZodType<T>): Promise<T>` in `http-client.ts` (throws `ApiError` on non-2xx, `ContractError` on schema mismatch).
-- Produces: `createApiContext(baseURL: string, token?: string): Promise<APIRequestContext>` (sets header from the scheme recorded in Task 4; caller disposes).
+- Produces: `createApiContext(request: APIRequest, baseURL: string, token?: string): Promise<APIRequestContext>` (`request` injected by fixtures so `src/api` imports `@playwright/test` types only; sets header from the scheme recorded in Task 4; caller disposes).
 - Produces: `class AuthClient { constructor(ctx: APIRequestContext); register(user: NewUser): Promise<ConduitUser>; login(email: string, password: string): Promise<ConduitUser> }` where `ConduitUser = { username: string; email: string; token: string }`.
 - Produces: `class ArticlesClient { constructor(ctx: APIRequestContext); create(a: NewArticle): Promise<ConduitArticle>; get(slug: string): Promise<ConduitArticle>; remove(slug: string): Promise<void> }` where `ConduitArticle = { slug: string; title: string; description: string; body: string; tagList: string[]; author: { username: string } }`.
 

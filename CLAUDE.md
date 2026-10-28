@@ -8,7 +8,7 @@ Greenfield Playwright Test + TypeScript (strict) framework, web UI + API. Not a 
 Execute the plan task by task, in order. Do not skip the failing-test step. Commit after each task. If the plan and spec conflict, stop and ask.
 
 ## Rules (apply to every change)
-- Layering, no cycles: `config <- utils <- api/components <- pages <- fixtures <- tests`. Flag any change that breaks it.
+- Layering, no cycles: `config <- utils <- data <- api/components <- pages <- fixtures <- tests`. Flag any change that breaks it.
 - Page objects: locators, verify, input and atomic actions only. No business-flow methods. Pages compose components.
 - Inject pages/components/clients via fixtures; never `new` them in tests. Tests import `test`/`expect` from `@fixtures/conduit` (exception: `tests/unit`).
 - Tests call actions one by one, each wrapped in `test.step('<label>')`.
