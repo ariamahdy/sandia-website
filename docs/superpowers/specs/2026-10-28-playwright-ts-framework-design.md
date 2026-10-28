@@ -98,7 +98,7 @@ Data: factories use `crypto.randomUUID()` for unique values. No faker until real
 - `trace: 'on-first-retry'`, `screenshot: 'only-on-failure'`, `video: 'retain-on-failure'`. Reporters: `list` + `html`; CI adds `junit`.
 - Explicit small timeouts (`expect`, `actionTimeout`, `navigationTimeout`). Raising timeouts is not a fix for flakiness.
 - Projects: `setup`, `conduit-e2e` (chromium, depends on `setup`), `conduit-api` (no browser, no storageState), `uat-*` registered only when `private/` exists and `AUT=uat`.
-- AUT lifecycle: `webServer` only waits for the Conduit URL health (`reuseExistingServer`). Containers are started explicitly with `npm run aut:up` / `aut:down` (no `webServer.command` to start Docker, to avoid orphaned containers).
+- AUT lifecycle: no `webServer` (Playwright requires `webServer.command` and applies it to every project, which would block `unit`). Containers are started explicitly with `npm run aut:up` (`docker compose up --wait` on healthchecks) / `aut:down`; CI waits with `scripts/aut-wait.mjs`.
 
 ## 7. Tooling and quality gates
 
@@ -134,7 +134,7 @@ Built-ins used instead of custom code: HTML reporter, trace, screenshot/video on
 5. Exact `eslint-plugin-playwright` rule names and options for the pinned version.
 6. Worker-scoped fixture (`scope: 'worker'`) usage and API-based teardown ordering.
 7. Conduit frontend/backend pair: multi-arch images, stability, auth token storage mechanism.
-8. `webServer` behavior with `reuseExistingServer` and a health URL only.
+8. `webServer` behavior with `reuseExistingServer` and a health URL only. Resolved: `command` is required and `webServer` is global, so it is not used (section 6).
 9. Latest stable versions of Playwright, TypeScript, typescript-eslint, eslint-plugin-playwright, zod to pin.
 
 ## 11. Risks and trade-offs

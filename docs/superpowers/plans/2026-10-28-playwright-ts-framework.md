@@ -107,7 +107,7 @@ Expected: all pass.
 - Consumes: `env`, `loadEnvFile` from `@config`.
 - Produces: `buildProjects(opts: { aut: Env['AUT']; hasPrivate: boolean }): readonly Project[]` in `src/config/projects.ts` (pure; throws `ConfigError` with message containing `private/` when `aut === 'uat' && !hasPrivate`, Review Focus 2).
 - Projects: `unit` (`testDir: tests/unit`), `setup` (`testMatch: tests/setup/*.setup.ts`), `conduit-e2e` (chromium, `dependencies: ['setup']`, `testDir: tests/e2e/conduit`, `storageState: .auth/conduit.json`), `conduit-api` (`testDir: tests/api/conduit`, no browser), `uat-e2e`/`uat-api` only when `private/` exists and `AUT=uat` (testDirs under `private/tests`).
-- Global config: `fullyParallel: true`, `forbidOnly: !!process.env.CI`, `retries: process.env.CI ? 1 : 0`, `trace: 'on-first-retry'`, `screenshot: 'only-on-failure'`, `video: 'retain-on-failure'`, reporters `list`+`html` (+`junit` in CI), explicit `expect.timeout`, `actionTimeout`, `navigationTimeout` (values chosen small, recorded in the file), `webServer` with `url: env.BASE_URL`, `reuseExistingServer: true`, no `command`.
+- Global config: `fullyParallel: true`, `forbidOnly: !!process.env.CI`, `retries: process.env.CI ? 1 : 0`, `trace: 'on-first-retry'`, `screenshot: 'only-on-failure'`, `video: 'retain-on-failure'`, reporters `list`+`html` (+`junit` in CI), explicit `expect.timeout`, `actionTimeout`, `navigationTimeout` (values chosen small, recorded in the file). No `webServer` (spec section 6).
 
 - [ ] **Step 1: Write failing tests** `projects.spec.ts`:
   - `buildProjects({aut:'conduit',hasPrivate:false})` names equal `['unit','setup','conduit-e2e','conduit-api']`
