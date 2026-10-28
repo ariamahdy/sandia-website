@@ -5,7 +5,7 @@ type BuildOptions = { aut: Env['AUT']; hasPrivate: boolean };
 
 const maximized: Project['use'] = {
   viewport: null,
-  launchOptions: { args: ['--start-maximized', '--window-size=1920,1080'] },
+  launchOptions: { args: ['--window-size=1920,1080'] },
 };
 
 const autProjects = (aut: Env['AUT'], root: string): Project[] => [

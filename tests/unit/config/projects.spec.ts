@@ -22,12 +22,12 @@ test('uat with private/ registers uat-e2e and uat-api', () => {
   expect(names('uat', true)).toEqual(expect.arrayContaining(['uat-e2e', 'uat-api']));
 });
 
-test('e2e projects open the browser maximized', () => {
+test('e2e projects start at a fixed window size that headed runs then maximize', () => {
   for (const aut of ['conduit', 'uat'] as const) {
     const e2e = buildProjects({ aut, hasPrivate: true }).find((p) => p.name === `${aut}-e2e`);
     expect(e2e?.use).toMatchObject({
       viewport: null,
-      launchOptions: { args: ['--start-maximized', '--window-size=1920,1080'] },
+      launchOptions: { args: ['--window-size=1920,1080'] },
     });
   }
 });
