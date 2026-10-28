@@ -124,7 +124,7 @@ Built-ins used instead of custom code: HTML reporter, trace, screenshot/video on
 - `stability`: `--repeat-each=5 --workers=4`; scheduled and manual, not per PR.
 - UAT CI via self-hosted runner inside the VPN: not built now; only kept possible by env- and project-driven design.
 
-## 10. Verification items (resolve in the plan, from Playwright/Node/package docs; do not assume)
+## 10. Verification items (resolved during implementation from Playwright/Node/package docs, not assumed)
 
 1. `process.loadEnvFile` availability and behavior on the pinned Node LTS; otherwise `dotenv`.
 2. Playwright resolves tsconfig `paths` aliases for test files and config as expected.

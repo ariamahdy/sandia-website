@@ -3,9 +3,8 @@
 Greenfield Playwright Test + TypeScript (strict) framework, web UI + API. Not a Katalon migration.
 
 ## Source of truth
-- Spec: `docs/superpowers/specs/2026-10-28-playwright-ts-framework-design.md`
-- Plan: `docs/superpowers/plans/2026-10-28-playwright-ts-framework.md`
-Execute the plan task by task, in order. Do not skip the failing-test step. Commit after each task. If the plan and spec conflict, stop and ask.
+- Spec: `docs/superpowers/specs/2026-10-28-playwright-ts-framework-design.md`. AUT facts: `infra/conduit/README.md`.
+Write the failing test first. Commit after each change. If a change conflicts with the spec, stop and ask.
 
 ## Rules (apply to every change)
 - Layering, no cycles: `config <- utils <- data <- api/components <- pages <- fixtures <- tests`. Flag any change that breaks it.
@@ -22,11 +21,11 @@ Execute the plan task by task, in order. Do not skip the failing-test step. Comm
 
 ## Definition of done
 - `npm run typecheck`: 0 errors. `npm run lint`: 0 errors/warnings.
-- From Task 10 on: `npm run test:stability` (`--repeat-each=5 --workers=4`) passes with no flakes.
+- `npm run test:stability` (`--repeat-each=5 --workers=4`) passes with no flakes.
 - No `waitForTimeout`, no `any`, no hard-coded secrets, no layering violation.
 
 ## Environment
-- Docker only on the personal laptop. Task 4 and the Conduit suites need it. Tasks 1-3, 5, 6 run without it.
+- Docker only on the personal laptop. The Conduit API/E2E suites need it; typecheck, lint and unit tests run without it.
 - Node 26 LTS (`.nvmrc`). TypeScript pinned to 6.0.3 on purpose (typescript-eslint peer range).
 
 ## Bug fixes
