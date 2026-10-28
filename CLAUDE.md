@@ -37,7 +37,7 @@ Write the failing test first. Commit after each change. If a change conflicts wi
 
 ## Environment
 - Docker only on the personal laptop. The Conduit API/E2E suites and `test:stability` need it; typecheck, lint and unit tests run without it.
-- Company laptop: no Docker, runs only `AUT=uat`. UAT values belong in `private/.env` (`AUTH_USERNAME`, `AUTH_PASSWORD`). Run with `AUT=uat` set in the shell; `playwright.config.ts` then loads `private/.env` instead of `.env`.
+- Company laptop: no Docker, runs only `AUT=uat`. UAT values belong in `private/.env` (`AUTH_USERNAME`, `AUTH_PASSWORD`). Run with `npm run test:uat` (cross-platform; never `AUT=uat npx ...`, which fails in PowerShell/cmd).
 - Node 26 LTS (`.nvmrc`). TypeScript pinned to 6.0.3 on purpose (typescript-eslint peer range).
 
 ## Bug fixes

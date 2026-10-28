@@ -109,7 +109,7 @@ Locator priority: `getByRole` > `getByLabel` > `getByTestId` > `getByText` > CSS
 
 ## Private extension point
 
-`private/` is gitignored and is its own git repository, cloned into place for testing a private application. It mirrors the `src/` and `tests/` layout, imports the core one way only (`private -> core`), and is reached through the `@uat/*` alias. Playwright registers its projects only when `private/` exists and `AUT=uat`. Its settings belong in `private/.env`; Playwright loads that file instead of `.env` when the shell sets `AUT=uat` (`AUT=uat npx playwright test --project=uat-e2e`).
+`private/` is gitignored and is its own git repository, cloned into place for testing a private application. It mirrors the `src/` and `tests/` layout, imports the core one way only (`private -> core`), and is reached through the `@uat/*` alias. Playwright registers its projects only when `private/` exists and `AUT=uat`. Its settings belong in `private/.env`; `npm run test:uat` loads it with `node --env-file`, which works the same on Windows and macOS; append Playwright options after `--` (`npm run test:uat -- --repeat-each=5`).
 
 Leak protection:
 
