@@ -38,6 +38,7 @@ const restrict = (files: string[], layers: Layer[], paths: RestrictedPath[] = [p
 export default defineConfig(
   globalIgnores(['node_modules/', 'playwright-report/', 'test-results/', 'blob-report/', '.auth/']),
   js.configs.recommended,
+  { rules: { 'no-empty-pattern': ['error', { allowObjectPatternsAsParameters: true }] } },
   {
     files: ['**/*.mjs'],
     languageOptions: { globals: { console: 'readonly', process: 'readonly', fetch: 'readonly' } },
@@ -71,6 +72,7 @@ export default defineConfig(
   restrict(['src/data/**/*.ts'], ['api', 'components', 'pages', 'fixtures']),
   restrict(['src/pages/**/*.ts'], ['fixtures']),
   restrict(['src/fixtures/**/*.ts'], [], []),
+  { files: ['src/fixtures/**/*.ts'], rules: { '@typescript-eslint/no-generated-empty-object-type': 'off' } },
   restrict(['tests/**/*.ts'], ['api', 'components', 'pages'], [playwrightBanned]),
   restrict(['tests/unit/**/*.ts'], [], []),
 );
