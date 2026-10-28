@@ -34,6 +34,7 @@ All base images are pinned by multi-arch index digest in `compose.yml`.
 - Auth header: `Authorization: Token <jwt>` (RealWorld spec). The backend also accepts `Bearer`.
 - Status codes: wrong login credentials return `403`; blank email or password `422`; missing article `404`; no token `401`.
 - The frontend stores the JWT in `localStorage` under the key `jwtToken`.
+- UI error text for wrong login credentials: `email or password is invalid` (rendered in `.error-messages`).
 - Endpoints: `/users`, `/users/login`, `/user`, `/articles`, `/articles/:slug`, `/tags` under `/api`.
 
 **Fallback:** if this pair becomes unstable and causes AUT-induced flakiness, replace it with a deterministic mock AUT in `infra/conduit/mock/` (spec section 8).

@@ -12,8 +12,14 @@ type TestFixtures = {
   loginPage: LoginPage;
   editorPage: EditorPage;
   articlePage: ArticlePage;
+  trackArticle: (slug: string) => void;
 };
 type WorkerFixtures = { workerCredentials: Readonly<NewUser>; workerUser: ConduitUser; workerStorageState: string };
+
+const removeIgnoringMissing = (api: ConduitApi, slug: string): Promise<void> =>
+  api.articles.remove(slug).catch((error: unknown) => {
+    if (!(error instanceof ApiError && error.status === 404)) throw error;
+  });
 
 export const test = base.extend<TestFixtures, WorkerFixtures>({
   workerCredentials: [
@@ -57,9 +63,14 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
   article: async ({ api }, use) => {
     const article = await api.articles.create(buildArticle());
     await use(article);
-    await api.articles.remove(article.slug).catch((error: unknown) => {
-      if (!(error instanceof ApiError && error.status === 404)) throw error;
+    await removeIgnoringMissing(api, article.slug);
+  },
+  trackArticle: async ({ api }, use) => {
+    const slugs: string[] = [];
+    await use((slug) => {
+      slugs.push(slug);
     });
+    await Promise.all(slugs.map((slug) => removeIgnoringMissing(api, slug)));
   },
   homePage: async ({ page }, use) => {
     await use(new HomePage(page));

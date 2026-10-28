@@ -14,4 +14,8 @@ export class HomePage {
   async goto(): Promise<void> {
     await this.page.goto('/');
   }
+
+  async gotoTag(tag: string): Promise<void> {
+    await this.page.goto(`/tag/${encodeURIComponent(tag)}`);
+  }
 }
