@@ -1,9 +1,9 @@
 import { existsSync } from 'node:fs';
 import { defineConfig, type ReporterDescription } from '@playwright/test';
-import { loadEnv, loadEnvFile } from '@config/env';
+import { envFileFor, loadEnv, loadEnvFile } from '@config/env';
 import { buildProjects } from '@config/projects';
 
-loadEnvFile('.env');
+loadEnvFile(envFileFor());
 const env = loadEnv();
 const ci = Boolean(process.env.CI);
 const reporter: ReporterDescription[] = [['list'], ['html', { open: 'never' }]];

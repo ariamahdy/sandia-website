@@ -30,3 +30,6 @@ export const loadEnv = (source: NodeJS.ProcessEnv = process.env): Env => {
 export const loadEnvFile = (path: string): void => {
   if (existsSync(path)) process.loadEnvFile(path);
 };
+
+export const envFileFor = (source: NodeJS.ProcessEnv = process.env): string =>
+  source['AUT'] === 'uat' ? 'private/.env' : '.env';
