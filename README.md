@@ -1,5 +1,7 @@
 # Playwright + TypeScript test framework
 
+[![CI](https://github.com/ariamahdy/sandia-website/actions/workflows/ci.yml/badge.svg)](https://github.com/ariamahdy/sandia-website/actions/workflows/ci.yml)
+
 A layered Playwright Test framework for web UI and API testing, written in strict TypeScript. Its core is application-agnostic and is proven against a self-hosted [RealWorld "Conduit"](https://github.com/gothinkster/realworld) app running in Docker.
 
 - Typed, layered architecture with import rules enforced by ESLint.
@@ -25,6 +27,42 @@ npm run aut:down
 ```
 
 The first `aut:up` builds the Conduit images from pinned upstream sources, which takes a few minutes. Later runs use the build cache. See [`infra/conduit/README.md`](infra/conduit/README.md) for the decision record.
+
+After a run, `npx playwright show-report` opens the HTML report with steps, traces, screenshots and videos of failures.
+
+## Configuration
+
+Settings come from `.env` (copied from `.env.example`) and are validated with zod before Playwright starts; every missing or invalid variable is reported at once.
+
+| Variable | Used by | Meaning |
+|---|---|---|
+| `AUT` | framework | `conduit` or `uat`; selects the Playwright projects |
+| `BASE_URL` | framework | UI base URL |
+| `API_URL` | framework | REST API base URL |
+| `AUTH_USERNAME`, `AUTH_PASSWORD` | framework, `AUT=uat` only | required when `AUT=uat` |
+| `CONDUIT_PORT` | Docker Compose | host port of the Conduit UI and API |
+| `CONDUIT_DB_PASSWORD`, `CONDUIT_JWT_SECRET` | Docker Compose | local-only, non-secret values for the throwaway AUT |
+
+## Project layout
+
+```
+src/
+  config/        env validation, Playwright project wiring
+  utils/         small pure helpers
+  data/          unique test data factories
+  api/           HTTP client and Conduit API clients
+  components/    Navbar, ArticleList, ErrorList
+  pages/         Conduit page objects
+  fixtures/      base.ts (AUT-agnostic), conduit.ts
+tests/
+  unit/          core logic, no browser or AUT
+  api/conduit/   API suite
+  e2e/conduit/   UI suite
+infra/conduit/   Conduit AUT: compose.yml, nginx.conf, decision record
+scripts/         guard, aut-wait, lint-rule check
+```
+
+Test titles start with an ID, `API-<AREA>-NNN` or `E2E-<AREA>-NNN`, for example `E2E-ART-001 create article via UI then see it on its page`.
 
 ## Commands
 
@@ -71,7 +109,7 @@ Locator priority: `getByRole` > `getByLabel` > `getByTestId` > `getByText` > CSS
 
 ## Private extension point
 
-`private/` is gitignored and is its own git repository, cloned into place for testing a private application. It mirrors the `src/` and `tests/` layout, imports the core one way only (`private -> core`), and is reached through the `@uat/*` alias. Playwright registers its projects only when `private/` exists and `AUT=uat`.
+`private/` is gitignored and is its own git repository, cloned into place for testing a private application. It mirrors the `src/` and `tests/` layout, imports the core one way only (`private -> core`), and is reached through the `@uat/*` alias. Playwright registers its projects only when `private/` exists and `AUT=uat`. Its settings belong in `private/.env`; loading that file is not wired yet.
 
 Leak protection:
 
@@ -82,10 +120,15 @@ Leak protection:
 ## Definition of done
 
 - `npm run typecheck`: 0 errors. `npm run lint`: 0 errors and 0 warnings.
-- Affected tests pass, and `npm run test:stability` passes with no flaky tests.
+- `npm run verify:lint`, `npm run guard` and `npm run test:unit` pass.
+- With the AUT up, `npm run test:stability` passes with no flaky tests.
 - No `waitForTimeout`, no `any`, no hard-coded secrets or URLs, no layering violation.
 
 ## CI
 
 - `ci.yml`: `quality` (typecheck, lint, lint-rule check, guard, gitleaks), then `test` (Conduit up, unit, API and UI suites; HTML report and traces uploaded as artifacts).
 - `stability.yml`: weekly and on demand, runs `npm run test:stability`.
+
+## License
+
+[MIT](LICENSE)
