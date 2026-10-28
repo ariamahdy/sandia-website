@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { ConfigError, loadEnv } from '@config/env';
+import { ConfigError, envFileFor, loadEnv } from '@config/env';
 
 const conduit = { AUT: 'conduit', BASE_URL: 'https://app.example.test', API_URL: 'https://api.example.test/api' };
 
@@ -35,4 +35,13 @@ test('invalid BASE_URL is named in the issues', () => {
 
 test('result is frozen', () => {
   expect(Object.isFrozen(loadEnv(conduit))).toBe(true);
+});
+
+test('uat loads its settings from private/.env', () => {
+  expect(envFileFor({ AUT: 'uat' })).toBe('private/.env');
+});
+
+test('any other AUT loads .env', () => {
+  expect(envFileFor({})).toBe('.env');
+  expect(envFileFor({ AUT: 'conduit' })).toBe('.env');
 });
