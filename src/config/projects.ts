@@ -3,8 +3,13 @@ import { ConfigError, type Env } from './env';
 
 type BuildOptions = { aut: Env['AUT']; hasPrivate: boolean };
 
+const maximized: Project['use'] = {
+  viewport: null,
+  launchOptions: { args: ['--start-maximized', '--window-size=1920,1080'] },
+};
+
 const autProjects = (aut: Env['AUT'], root: string): Project[] => [
-  { name: `${aut}-e2e`, testDir: `${root}/e2e/${aut}`, use: { browserName: 'chromium' } },
+  { name: `${aut}-e2e`, testDir: `${root}/e2e/${aut}`, use: { browserName: 'chromium', ...maximized } },
   { name: `${aut}-api`, testDir: `${root}/api/${aut}` },
 ];
 
