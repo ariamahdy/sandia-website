@@ -1,5 +1,5 @@
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
-import { captureSessionStorage, restoreSessionStorage } from '@fixtures/session-storage';
+import { captureSessionStorage, clearRestoredSessionStorage, restoreSessionStorage } from '@fixtures/session-storage';
 
 const appUrl = 'https://app.test/home';
 
@@ -38,7 +38,7 @@ test('restores the entries on the same origin in a new context', async ({ browse
   await restoreSessionStorage(context, snapshot);
   const page = await context.newPage();
   await page.goto(snapshot.url);
-  expect(await storageOf(page)).toEqual(snapshot.entries);
+  expect((await captureSessionStorage(page)).entries).toEqual(snapshot.entries);
   await context.close();
 });
 
@@ -62,6 +62,28 @@ test('keeps a value the app changed after load', async ({ browser }) => {
     sessionStorage.setItem('a', '2');
   });
   await page.reload();
-  expect(await storageOf(page)).toEqual({ a: '2' });
+  expect((await captureSessionStorage(page)).entries).toEqual({ a: '2' });
+  await context.close();
+});
+
+test('does not refill the entries after the restored storage was cleared', async ({ browser }) => {
+  const context = await browser.newContext();
+  await serve(context);
+  await restoreSessionStorage(context, { url: appUrl, entries: { a: '1' } });
+  const page = await context.newPage();
+  await page.goto(appUrl);
+  await clearRestoredSessionStorage(page);
+  await page.reload();
+  expect(await captureSessionStorage(page)).toEqual({ url: appUrl, entries: {} });
+  await context.close();
+});
+
+test('captures only the app entries after a restore', async ({ browser }) => {
+  const context = await browser.newContext();
+  await serve(context);
+  await restoreSessionStorage(context, { url: appUrl, entries: { a: '1' } });
+  const page = await context.newPage();
+  await page.goto(appUrl);
+  expect(await captureSessionStorage(page)).toEqual({ url: appUrl, entries: { a: '1' } });
   await context.close();
 });
