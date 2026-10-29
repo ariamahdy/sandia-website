@@ -22,3 +22,5 @@ export const indonesianMonthName = ({ year, month }: YearMonth): string =>
 
 export const dayMonthYear = (date: Date): string =>
   `${pad(date.getDate())}-${pad(date.getMonth() + 1)}-${String(date.getFullYear())}`;
+
+export const isoDate = (date: Date): string => `${toIsoMonth(yearMonthOf(date))}-${pad(date.getDate())}`;
