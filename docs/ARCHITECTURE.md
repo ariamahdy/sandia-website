@@ -42,7 +42,7 @@ Leak protection:
 - ESLint forbids core code from importing `@uat/*` or `private/`.
 - `npm run guard` (pre-push and CI) fails if `private/` or an env file other than `.env.example` is tracked, or if tracked text matches `scripts/guard.denylist.txt` merged with `private/guard.denylist.txt`.
 - CI runs on a clean clone without `private/`, plus gitleaks.
-- `npm install` (`prepare`) points the `private` repo's `core.hooksPath` at `scripts/private-hooks`, whose pre-commit runs `npm run typecheck` and ESLint on the staged `private/` files; without `private/` it is skipped.
+- `npm install` (`prepare`) points the `private` repo's `core.hooksPath` at `scripts/private-hooks`, whose pre-commit runs `npm run typecheck` and ESLint on all of `private/`; without `private/`, or outside a git checkout, it is skipped.
 
 
 ## Decisions
@@ -73,3 +73,4 @@ A change to layering, a new dependency, a shared fixture or contract, or a lint/
 - R5: the CDP maximize path (D3) is Chromium-only and not unit-tested.
 - R6: UAT cannot run in CI because it sits behind the VPN; a self-hosted runner is out of scope.
 - R7: some rules rely on discipline, not tools: `test.step` wrapping of every action, and core changes found on UAT going to this repo first.
+- R8: the `private` pre-commit checks the working tree, not the staged index: a partially staged file is checked as it is on disk, and broken uncommitted core code also blocks a `private/` commit.
