@@ -8,7 +8,7 @@ Source of truth for the layering, isolation model, private extension point, deci
 config  <-  utils  <-  data  <-  api / components  <-  pages  <-  fixtures  <-  tests
 ```
 
-Each layer may import only from layers to its left. `eslint.config.ts` enforces this per directory, and `npm run verify:lint` checks that the rules keep firing.
+Each layer may import only from layers to its left. `eslint.config.ts` enforces this per directory, and `npm run verify:lint` checks that the rules keep firing. The same map, and the Playwright test rules, apply to `private/src/<layer>` and `private/tests`, through the `@uat/src/<layer>` aliases.
 
 | Layer | Contains | Not allowed |
 |---|---|---|
@@ -60,6 +60,7 @@ A change to layering, a new dependency, a shared fixture or contract, or a lint/
 | D8 | UAT runs through `node --env-file=private/.env`; a root `.env` holding only `AUT=uat` makes other entry points load `private/.env` | `AUT=uat npx ...` fails in PowerShell and cmd | `package.json` scripts |
 | D9 | Conduit is built from pinned upstream sources, not a prebuilt image | No prebuilt RealWorld image was multi-arch | `infra/conduit/README.md` decision record |
 | D10 | Public repo never holds UAT details; `private/` is its own git repo, reached one way (`private -> core`) | Hybrid goal: public showcase plus company UAT | ESLint, `npm run guard`, gitleaks in CI |
+| D11 | `private/` is linted with the core rules: the Playwright test rules for `private/tests`, the layer map for `private/src/<layer>` through `@uat/src/<layer>` | The UAT suite had no Playwright rules and no layering, so `waitForTimeout`, a skipped test or a page importing fixtures passed lint there | `eslint.config.ts`, `npm run verify:lint` (3 private cases, also run without `private/`) |
 
 ## Risks and limits
 

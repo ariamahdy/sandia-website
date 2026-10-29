@@ -64,6 +64,24 @@ const cases = [
     expect: '@typescript-eslint/no-explicit-any',
   },
   {
+    name: 'private tests ban waitForTimeout',
+    filePath: 'private/tests/x.spec.ts',
+    code: "import { test } from '@fixtures/conduit';\ntest('waits', async ({ page }) => {\n  await page.waitForTimeout(1);\n});\n",
+    expect: 'playwright/no-wait-for-timeout',
+  },
+  {
+    name: 'private tests must not import @playwright/test',
+    filePath: 'private/tests/x.spec.ts',
+    code: "import { test, expect } from '@playwright/test';\ntest('a', () => {\n  expect(1).toBe(1);\n});\n",
+    expect: '@typescript-eslint/no-restricted-imports',
+  },
+  {
+    name: 'private pages must not import fixtures',
+    filePath: 'private/src/pages/x.ts',
+    code: "import { test } from '@uat/src/fixtures/uat';\nexport const t = test;\n",
+    expect: '@typescript-eslint/no-restricted-imports',
+  },
+  {
     name: 'unit tests may import @playwright/test',
     filePath: 'tests/unit/x.spec.ts',
     code: "import { test, expect } from '@playwright/test';\ntest('a', () => {\n  expect(1).toBe(1);\n});\n",
