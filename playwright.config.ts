@@ -19,7 +19,7 @@ export default defineConfig({
     baseURL: env.BASE_URL,
     actionTimeout: 10_000,
     navigationTimeout: 15_000,
-    trace: 'on-first-retry',
+    trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
   },
