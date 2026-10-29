@@ -2,8 +2,7 @@ import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 
-const root = execFileSync('git', ['rev-parse', '--show-toplevel'], { encoding: 'utf8' }).trim();
-const privateRepo = join(root, 'private');
+const privateRepo = join(import.meta.dirname, '..', 'private');
 
 if (existsSync(join(privateRepo, '.git'))) {
   execFileSync('git', ['-C', privateRepo, 'config', 'core.hooksPath', '../scripts/private-hooks']);
