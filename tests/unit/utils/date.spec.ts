@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 import {
   dayMonthYear,
   firstDayOf,
+  isoDate,
   indonesianMonthName,
   lastDayOf,
   monthLabel,
@@ -51,4 +52,9 @@ test('indonesianMonthName is the full Indonesian name in uppercase', () => {
 test('dayMonthYear is the local date as DD-MM-YYYY', () => {
   expect(dayMonthYear(new Date(2026, 9, 29))).toBe('29-10-2026');
   expect(dayMonthYear(new Date(2026, 0, 5))).toBe('05-01-2026');
+});
+
+test('isoDate is the local date as YYYY-MM-DD', () => {
+  expect(isoDate(new Date(2026, 9, 29))).toBe('2026-10-29');
+  expect(isoDate(new Date(2027, 0, 5))).toBe('2027-01-05');
 });
