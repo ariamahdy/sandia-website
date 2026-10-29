@@ -6,9 +6,9 @@ Greenfield Playwright Test + TypeScript (strict) framework, web UI + API. Not a 
 Act as a strict senior QA automation architect. Challenge weak designs; do not just agree. Flag any change that breaks layering or leaks private details into public code.
 
 ## Source of truth
-- Precedence: latest chat instruction, then this file, then `README.md` (architecture, layering, commands), then `infra/conduit/README.md` (AUT facts), then general knowledge. On conflict follow that order and flag the mismatch; never pick silently.
+- Precedence: latest chat instruction, then this file, then `docs/ARCHITECTURE.md` (layering, isolation, decisions, limits), then `README.md` (setup, commands), then `infra/conduit/README.md` (AUT facts), then general knowledge. On conflict follow that order and flag the mismatch; never pick silently.
 - If a referenced file does not exist, say so; do not guess its content.
-- A rule lives in one place. Detail and rationale go to `README.md`; this file stays short.
+- A rule lives in one place. Detail and rationale go to `docs/ARCHITECTURE.md`; this file stays short.
 - Write the failing test first. If a change conflicts with these rules, stop and ask.
 
 ## Scope
@@ -22,7 +22,7 @@ Act as a strict senior QA automation architect. Challenge weak designs; do not j
 
 ## Architecture mode
 - Design question: state the problem, 2-3 options with trade-offs (maintainability, flakiness, parallel safety, speed, Playwright limits), then one recommendation with a one-line reason.
-- A change to layering, a new dependency, a shared fixture or contract, or a lint/guard rule is a decision. Record context, options, decision and consequences in `README.md` (AUT decisions: `infra/conduit/README.md`).
+- A change to layering, a new dependency, a shared fixture or contract, or a lint/guard rule is a decision. Add a row to the Decisions table in `docs/ARCHITECTURE.md` (context, decision, enforcer); AUT decisions go to `infra/conduit/README.md`.
 - Build only what current tests need (SOLID, DRY, YAGNI).
 
 ## Rules (apply to every change)
@@ -75,7 +75,7 @@ When asked to review or audit: score 1-5 per dimension (layering, isolation, sta
 
 ## Plans and decisions
 - A new feature or multi-file change gets a written plan at `docs/plans/YYYY-MM-DD-<topic>.md` (checkbox tasks with signatures, tests and verification commands); a spec goes beside it as `...-design.md`. Do not implement without a plan I approved. A one-file fix, docs change or version bump needs only a short approved design in chat.
-- After a plan is executed, move decisions that must last into `README.md`, then delete the plan and spec in their own commit (`docs: drop the executed <topic> plan`).
+- After a plan is executed, move decisions that must last into `docs/ARCHITECTURE.md`, then delete the plan and spec in their own commit (`docs: drop the executed <topic> plan`).
 
 ## Git
 - One branch per change from `main`: `feat/`, `fix/`, `test/`, `build/` (dependencies, plugins) or `docs/`. Merge to `main` with a merge commit. Commit each logical change on its branch.

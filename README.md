@@ -60,6 +60,7 @@ tests/
   e2e/conduit/   UI suite
 infra/conduit/   Conduit AUT: compose.yml, nginx.conf, decision record
 scripts/         guard, aut-wait, lint-rule check
+docs/            ARCHITECTURE.md
 ```
 
 Test titles start with an ID, `API-<AREA>-NNN` or `E2E-<AREA>-NNN`, for example `E2E-ART-001 create article via UI then see it on its page`.
@@ -78,44 +79,9 @@ Test titles start with an ID, `API-<AREA>-NNN` or `E2E-<AREA>-NNN`, for example 
 | `npm run aut:up` / `aut:down` | Start / stop the Conduit AUT |
 | `npm run guard` | Leak guard (also runs on `git push`) |
 
-## Layering
+## Architecture
 
-```
-config  <-  utils  <-  data  <-  api / components  <-  pages  <-  fixtures  <-  tests
-```
-
-Each layer may import only from layers to its left. `eslint.config.ts` enforces this per directory, and `npm run verify:lint` checks that the rules keep firing.
-
-| Layer | Contains | Not allowed |
-|---|---|---|
-| `src/config` | env loading and validation (zod), Playwright project wiring | anything above it |
-| `src/utils` | small pure helpers | anything above it |
-| `src/data` | factories that build unique test data | anything above it |
-| `src/api` | thin `APIRequestContext` clients, zod-validated responses | UI, assertions on behaviour |
-| `src/components` | scoped by a root `Locator`: locators, `verify*`, atomic actions | page knowledge |
-| `src/pages` | compose components; locators, `verify*`, atomic actions | business flows (e.g. `login(user, pass)`) |
-| `src/fixtures` | inject pages, components, clients and data; API teardown | business assertions |
-| `tests` | call actions one by one, each inside `test.step` | `new` page objects, raw locators, importing `@playwright/test` |
-
-Only `src/fixtures` and `tests/unit` import `@playwright/test` freely. Other core layers import types only, and components/pages may also import `expect` for web-first `verify*` methods.
-
-Locator priority: `getByRole` > `getByLabel` > `getByTestId` > `getByText` > CSS. XPath is a last resort. Any CSS or XPath locator carries its reason in the commit message.
-
-## Test isolation
-
-- A worker fixture registers a unique user through the API, signs in once through the UI and saves `.auth/<aut>-<parallelIndex>.json`. The browser, the API clients and teardown all act as that user.
-- Every test creates its own data through the API with unique values and removes it in fixture teardown, tolerating data the test already deleted.
-- No order dependence, no shared mutable state, no `waitForTimeout`. Flakiness is fixed at the root, never with timeouts or retries. CI retries once only to report flakes.
-
-## Private extension point
-
-`private/` is gitignored and is its own git repository, cloned into place for testing a private application. It mirrors the `src/` and `tests/` layout, imports the core one way only (`private -> core`), and is reached through the `@uat/*` alias. Playwright registers its projects only when `private/` exists and `AUT=uat`. Its settings belong in `private/.env`; `npm run test:uat` loads it with `node --env-file`, which works the same on Windows and macOS; append Playwright options after `--` (`npm run test:uat -- --repeat-each=5`). Tests that change shared records are tagged `@mutating`: every e2e project skips them, and only `npm run test:uat:mutating` runs them, in its own `uat-mutating` project with one worker. A root `.env` containing only `AUT=uat` makes every other entry point (`npx playwright test`, the VS Code extension) load `private/.env` too; `AUT` from the shell wins over that file.
-
-Leak protection:
-
-- ESLint forbids core code from importing `@uat/*` or `private/`.
-- `npm run guard` (pre-push and CI) fails if `private/` or an env file other than `.env.example` is tracked, or if tracked text matches `scripts/guard.denylist.txt` merged with `private/guard.denylist.txt`.
-- CI runs on a clean clone without `private/`, plus gitleaks.
+Layering, test isolation, the private extension point and the decision log live in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md). In short: `config <- utils <- data <- api / components <- pages <- fixtures <- tests`, enforced by ESLint and `npm run verify:lint`; each worker gets its own API-created user; `private/` is gitignored, its own repo, and guarded by `npm run guard`.
 
 ## Definition of done
 
