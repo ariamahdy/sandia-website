@@ -77,6 +77,7 @@ A change to layering, a new dependency, a shared fixture or contract, or a lint/
 | D10 | Public repo never holds UAT details; `private/` is its own git repo, reached one way (`private -> core`) | Hybrid goal: public showcase plus company UAT | ESLint, `npm run guard`, gitleaks in CI |
 | D11 | `private/` is linted with the core rules: the Playwright test rules for `private/tests`, the layer map for `private/src/<layer>` through `@uat/src/<layer>` | The UAT suite had no Playwright rules and no layering, so `waitForTimeout`, a skipped test or a page importing fixtures passed lint there | `eslint.config.ts`, `npm run verify:lint` (3 private cases, also run without `private/`) |
 | D12 | The `private` repo's commits run the core typecheck and lint through `scripts/private-hooks/pre-commit`, set by `scripts/setup-private-hooks.mjs` in `prepare` | `simple-git-hooks` installs hooks only in the core repo, so `private/` commits ran no checks | `scripts/private-hooks/pre-commit` |
+| D13 | An opening shared by tests in a file goes in `test.beforeEach` inside `test.describe`, one `test.step` per action; deeper shared prefixes get a nested `describe`. No navigation fixtures or step helpers. A test whose whole body would be the shared opening stays standalone | Copied openings meant one locator or flow change had to be edited in every test. Fixtures and helpers were rejected because they move UI flows out of the test layer | Review |
 
 ## Risks and limits
 
