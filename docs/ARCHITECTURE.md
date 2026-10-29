@@ -45,6 +45,20 @@ Leak protection:
 - `npm install` (`prepare`) points the `private` repo's `core.hooksPath` at `scripts/private-hooks`, whose pre-commit runs `npm run typecheck` and ESLint on all of `private/`; without `private/`, or outside a git checkout, it is skipped.
 
 
+## Porting a page from an older suite
+
+A Katalon or Selenium script is a list of intended actions, not a description of the page: it can miss clicks, and its locators reflect another tool's view of the DOM. Port from the real page.
+
+1. Read the old script and list every action, including each confirmation and each submit inside a dialog or panel. A form that is filled but never submitted is a missing step, not a quirk to copy.
+2. Take locators from the real page: `npx playwright codegen <url>` on a machine that reaches the AUT, or the page snapshot in `error-context.md` from a first run. Never copy an old XPath or CSS selector without checking it against that snapshot.
+3. Before writing the page object, answer for each element:
+   - Is it a link or a button? An action shown as a link is still the user's "button".
+   - Does a button show only an icon? Its accessible name is the icon, so locate it by `title`.
+   - Is a popup a library alert (often reused in place and faded out rather than removed), a modal dialog, or a section of the page without `role="dialog"`?
+   - Does a confirmation open a second, result popup, and what does it say?
+   - Is a date or month field a native `type="date"`/`type="month"` input? `fill()` then needs the ISO value.
+4. A first run that fails is read from its snapshot and trace, not by re-reading the old script.
+
 ## Decisions
 
 A change to layering, a new dependency, a shared fixture or contract, or a lint/guard rule adds a row here with context, decision and enforcer. "Review" means no tool enforces it.
@@ -72,5 +86,5 @@ A change to layering, a new dependency, a shared fixture or contract, or a lint/
 - R4: no automated dependency or advisory updates (no Dependabot or Renovate); exact pins age silently.
 - R5: the CDP maximize path (D3) is Chromium-only and not unit-tested.
 - R6: UAT cannot run in CI because it sits behind the VPN; a self-hosted runner is out of scope.
-- R7: some rules rely on discipline, not tools: `test.step` wrapping of every action, and core changes found on UAT going to this repo first.
+- R7: some rules rely on discipline, not tools: `test.step` wrapping of every action, core changes found on UAT going to this repo first, and the porting checklist above.
 - R8: the `private` pre-commit checks the working tree, not the staged index: a partially staged file is checked as it is on disk, and broken uncommitted core code also blocks a `private/` commit.
