@@ -42,6 +42,7 @@ Leak protection:
 - ESLint forbids core code from importing `@uat/*` or `private/`.
 - `npm run guard` (pre-push and CI) fails if `private/` or an env file other than `.env.example` is tracked, or if tracked text matches `scripts/guard.denylist.txt` merged with `private/guard.denylist.txt`.
 - CI runs on a clean clone without `private/`, plus gitleaks.
+- `npm install` (`prepare`) points the `private` repo's `core.hooksPath` at `scripts/private-hooks`, whose pre-commit runs `npm run typecheck` and ESLint on the staged `private/` files; without `private/` it is skipped.
 
 
 ## Decisions
@@ -61,6 +62,7 @@ A change to layering, a new dependency, a shared fixture or contract, or a lint/
 | D9 | Conduit is built from pinned upstream sources, not a prebuilt image | No prebuilt RealWorld image was multi-arch | `infra/conduit/README.md` decision record |
 | D10 | Public repo never holds UAT details; `private/` is its own git repo, reached one way (`private -> core`) | Hybrid goal: public showcase plus company UAT | ESLint, `npm run guard`, gitleaks in CI |
 | D11 | `private/` is linted with the core rules: the Playwright test rules for `private/tests`, the layer map for `private/src/<layer>` through `@uat/src/<layer>` | The UAT suite had no Playwright rules and no layering, so `waitForTimeout`, a skipped test or a page importing fixtures passed lint there | `eslint.config.ts`, `npm run verify:lint` (3 private cases, also run without `private/`) |
+| D12 | The `private` repo's commits run the core typecheck and lint through `scripts/private-hooks/pre-commit`, set by `scripts/setup-private-hooks.mjs` in `prepare` | `simple-git-hooks` installs hooks only in the core repo, so `private/` commits ran no checks | `scripts/private-hooks/pre-commit` |
 
 ## Risks and limits
 

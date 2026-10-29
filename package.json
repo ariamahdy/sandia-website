@@ -21,7 +21,7 @@
     "aut:up": "docker compose -f infra/conduit/compose.yml --env-file .env up -d --build --wait",
     "aut:down": "docker compose -f infra/conduit/compose.yml --env-file .env down -v",
     "guard": "node scripts/guard.mjs",
-    "prepare": "simple-git-hooks"
+    "prepare": "simple-git-hooks && node scripts/setup-private-hooks.mjs"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
