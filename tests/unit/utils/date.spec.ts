@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import {
+  dayMonthYear,
   firstDayOf,
   indonesianMonthName,
   lastDayOf,
@@ -45,4 +46,9 @@ test('indonesianMonthName is the full Indonesian name in uppercase', () => {
   expect(indonesianMonthName({ year: 2026, month: 5 })).toBe('MEI');
   expect(indonesianMonthName({ year: 2026, month: 8 })).toBe('AGUSTUS');
   expect(indonesianMonthName({ year: 2026, month: 12 })).toBe('DESEMBER');
+});
+
+test('dayMonthYear is the local date as DD-MM-YYYY', () => {
+  expect(dayMonthYear(new Date(2026, 9, 29))).toBe('29-10-2026');
+  expect(dayMonthYear(new Date(2026, 0, 5))).toBe('05-01-2026');
 });

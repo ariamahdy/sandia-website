@@ -19,3 +19,6 @@ export const monthLabel = ({ year, month }: YearMonth): string =>
 
 export const indonesianMonthName = ({ year, month }: YearMonth): string =>
   new Date(year, month - 1, 1).toLocaleString('id-ID', { month: 'long' }).toUpperCase();
+
+export const dayMonthYear = (date: Date): string =>
+  `${pad(date.getDate())}-${pad(date.getMonth() + 1)}-${String(date.getFullYear())}`;
