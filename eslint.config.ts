@@ -5,6 +5,7 @@ import playwright from 'eslint-plugin-playwright';
 import tseslint from 'typescript-eslint';
 
 type Layer = 'config' | 'utils' | 'api' | 'components' | 'data' | 'pages' | 'fixtures';
+type UatLayer = 'config' | 'components' | 'pages' | 'fixtures';
 type RestrictedPath = { name: string; message: string; allowTypeImports?: boolean; allowImportNames?: string[] };
 
 const playwrightTypesOnly: RestrictedPath = {
@@ -20,10 +21,26 @@ const playwrightExpectOnly: RestrictedPath = {
 };
 const playwrightBanned: RestrictedPath = {
   name: '@playwright/test',
-  message: 'Import test/expect from @fixtures/conduit.',
+  message: 'Import test/expect from the AUT fixtures.',
 };
 
-const restrict = (files: string[], layers: Layer[], paths: RestrictedPath[] = [playwrightTypesOnly]): Linter.Config => ({
+const uatPatterns = (uatLayers?: UatLayer[]) =>
+  uatLayers === undefined
+    ? [
+        { group: ['@uat', '@uat/*'], message: 'Core must not import @uat.' },
+        { regex: '(^|/)private(/|$)', message: 'Core must not import private/.' },
+      ]
+    : uatLayers.map((layer) => ({
+        group: [`@uat/src/${layer}`, `@uat/src/${layer}/*`],
+        message: `Layering: @uat/src/${layer} is not allowed here.`,
+      }));
+
+const restrict = (
+  files: string[],
+  layers: Layer[],
+  paths: RestrictedPath[] = [playwrightTypesOnly],
+  uatLayers?: UatLayer[],
+): Linter.Config => ({
   files,
   rules: {
     '@typescript-eslint/no-restricted-imports': [
@@ -32,8 +49,7 @@ const restrict = (files: string[], layers: Layer[], paths: RestrictedPath[] = [p
         paths,
         patterns: [
           ...layers.map((layer) => ({ group: [`@${layer}`, `@${layer}/*`], message: `Layering: @${layer} is not allowed here.` })),
-          { group: ['@uat', '@uat/*'], message: 'Core must not import @uat.' },
-          { regex: '(^|/)private(/|$)', message: 'Core must not import private/.' },
+          ...uatPatterns(uatLayers),
           { regex: '^\\.\\./', message: 'Use a path alias instead of a deep relative import.' },
         ],
       },
@@ -56,7 +72,7 @@ export default defineConfig(
     rules: { 'no-restricted-imports': 'off' },
   },
   {
-    files: ['tests/**/*.ts'],
+    files: ['tests/**/*.ts', 'private/tests/**/*.ts'],
     extends: [playwright.configs['flat/recommended']],
     rules: {
       'playwright/no-wait-for-timeout': 'error',
@@ -81,4 +97,14 @@ export default defineConfig(
   { files: ['src/fixtures/**/*.ts'], rules: { '@typescript-eslint/no-generated-empty-object-type': 'off' } },
   restrict(['tests/**/*.ts'], ['api', 'components', 'pages'], [playwrightBanned]),
   restrict(['tests/unit/**/*.ts'], [], []),
+  restrict(
+    ['private/src/config/**/*.ts'],
+    ['utils', 'api', 'components', 'data', 'pages', 'fixtures'],
+    [playwrightTypesOnly],
+    ['components', 'pages', 'fixtures'],
+  ),
+  restrict(['private/src/components/**/*.ts'], ['api', 'pages', 'fixtures'], [playwrightExpectOnly], ['pages', 'fixtures']),
+  restrict(['private/src/pages/**/*.ts'], ['fixtures'], [playwrightExpectOnly], ['fixtures']),
+  restrict(['private/src/fixtures/**/*.ts'], [], [], []),
+  restrict(['private/tests/**/*.ts'], ['api', 'components', 'pages'], [playwrightBanned], ['components', 'pages']),
 );
