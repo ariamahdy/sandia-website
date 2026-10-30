@@ -43,11 +43,11 @@ for (const file of tracked) {
     });
 }
 
-for (const file of tracked.filter((f) => /^\.github\/workflows\/[^/]+\.ya?ml$/.test(f) && existsSync(join(root, f)))) {
+for (const file of tracked.filter((f) => /^\.github\/(workflows\/[^/]+|actions\/.+\/action)\.ya?ml$/.test(f) && existsSync(join(root, f)))) {
   readFileSync(join(root, file), 'utf8')
     .split('\n')
     .forEach((line, index) => {
-      const ref = /^\s*-?\s*uses:\s*(\S+)/.exec(line)?.[1];
+      const ref = /(?:^\s*-?\s*|[{,]\s*)uses:\s*["']?([^"'\s,}#]+)/.exec(line)?.[1];
       if (ref === undefined || ref.startsWith('./') || ref.startsWith('docker://') || /@[0-9a-f]{40}$/.test(ref)) return;
       problems.push(`${file}:${String(index + 1)}: action ${ref} is not pinned to a commit SHA`);
     });
