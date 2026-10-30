@@ -61,13 +61,13 @@ const hasHead = (() => {
     return false;
   }
 })();
-const git = (...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8', maxBuffer: 1 << 28 });
-const unpushed = hasHead ? git('rev-list', 'HEAD', '--not', '--remotes').split('\n').filter(Boolean) : [];
+const git = (...args) => execFileSync('git', ['-c', 'core.quotePath=false', ...args], { cwd: root, encoding: 'utf8', maxBuffer: 1 << 28 });
+const unpushed = hasHead ? git('rev-list', 'HEAD', '--branches', '--not', '--remotes').split('\n').filter(Boolean) : [];
 
 for (const sha of unpushed) {
   let file = '';
   const hits = new Set();
-  for (const line of git('show', '--format=', '--unified=0', '--no-color', sha).split('\n')) {
+  for (const line of git('show', '--format=', '--unified=0', '--no-color', '--no-ext-diff', '--no-textconv', '--src-prefix=a/', '--dst-prefix=b/', sha).split('\n')) {
     if (line.startsWith('+++ ')) {
       file = line.startsWith('+++ b/') ? line.slice(6) : '';
       continue;
