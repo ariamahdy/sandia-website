@@ -43,7 +43,7 @@ for (const file of tracked) {
     });
 }
 
-for (const file of tracked.filter((f) => /^\.github\/workflows\/[^/]+\.ya?ml$/.test(f))) {
+for (const file of tracked.filter((f) => /^\.github\/workflows\/[^/]+\.ya?ml$/.test(f) && existsSync(join(root, f)))) {
   readFileSync(join(root, file), 'utf8')
     .split('\n')
     .forEach((line, index) => {
