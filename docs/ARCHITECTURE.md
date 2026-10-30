@@ -40,7 +40,7 @@ Locator priority: `getByRole` > `getByLabel` > `getByTestId` > `getByText` > CSS
 Leak protection:
 
 - ESLint forbids core code from importing `@uat/*` or `private/`.
-- `npm run guard` (pre-push and CI) fails if `private/` or an env file other than `.env.example` is tracked, or if tracked text matches `scripts/guard.denylist.txt` merged with `private/guard.denylist.txt`.
+- `npm run guard` (pre-push and CI) fails if `private/` or an env file other than `.env.example` is tracked, or if tracked text matches `scripts/guard.denylist.txt` merged with `private/guard.denylist.txt`. It also scans the added lines of every commit not on a remote yet, so a term added and removed again before a push still fails it.
 - CI runs on a clean clone without `private/`, plus gitleaks.
 - `npm install` (`prepare`) points the `private` repo's `core.hooksPath` at `scripts/private-hooks`, whose pre-commit runs `npm run typecheck` and ESLint on all of `private/`; without `private/`, or outside a git checkout, it is skipped.
 
@@ -79,6 +79,7 @@ A change to layering, a new dependency, a shared fixture or contract, or a lint/
 | D12 | The `private` repo's commits run the core typecheck and lint through `scripts/private-hooks/pre-commit`, set by `scripts/setup-private-hooks.mjs` in `prepare` | `simple-git-hooks` installs hooks only in the core repo, so `private/` commits ran no checks | `scripts/private-hooks/pre-commit` |
 | D13 | An opening shared by tests in a file goes in `test.beforeEach` inside `test.describe`, one `test.step` per action; deeper shared prefixes get a nested `describe`. No navigation fixtures or step helpers. A test whose whole body would be the shared opening stays standalone | Copied openings meant one locator or flow change had to be edited in every test. Fixtures and helpers were rejected because they move UI flows out of the test layer | Review |
 | D14 | A private AUT that keeps its session in `sessionStorage` reuses it once per worker and app through `captureSessionStorage`/`restoreSessionStorage` (`src/fixtures/session-storage.ts`), in memory only. A restore writes once per tab; when the AUT rejects it, `clearRestoredSessionStorage` empties the tab so the UI sign-in that follows cannot pick up the stale session | `storageState` covers cookies, localStorage and IndexedDB, not `sessionStorage`; the Playwright docs restore it with `addInitScript` | `tests/unit/fixtures/session-storage.spec.ts` |
+| D15 | `npm run guard` scans the added lines of commits not on a remote yet (`git rev-list HEAD --not --remotes`) against the same denylist, printing commit, file and pattern but never the line | The tracked-file scan missed company terms in an unpushed commit whose file had since been reworded; pushing would have published them | `tests/unit/scripts/guard.spec.ts` |
 
 ## Risks and limits
 
