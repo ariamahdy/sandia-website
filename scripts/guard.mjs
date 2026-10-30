@@ -43,6 +43,32 @@ for (const file of tracked) {
     });
 }
 
+const hasHead = (() => {
+  try {
+    execFileSync('git', ['rev-parse', '--verify', '-q', 'HEAD'], { cwd: root, stdio: 'ignore' });
+    return true;
+  } catch {
+    return false;
+  }
+})();
+const git = (...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8', maxBuffer: 1 << 28 });
+const unpushed = hasHead ? git('rev-list', 'HEAD', '--not', '--remotes').split('\n').filter(Boolean) : [];
+
+for (const sha of unpushed) {
+  let file = '';
+  const hits = new Set();
+  for (const line of git('show', '--format=', '--unified=0', '--no-color', sha).split('\n')) {
+    if (line.startsWith('+++ ')) {
+      file = line.startsWith('+++ b/') ? line.slice(6) : '';
+      continue;
+    }
+    if (!line.startsWith('+') || file === '' || denylistFiles.includes(file)) continue;
+    const hit = patterns.find((pattern) => pattern.test(line.slice(1)));
+    if (hit) hits.add(`${sha.slice(0, 7)} ${file}: matches denylist pattern /${hit.source}/`);
+  }
+  problems.push(...hits);
+}
+
 if (problems.length > 0) {
   console.error(`guard: ${String(problems.length)} problem(s)\n${problems.join('\n')}`);
   process.exit(1);
