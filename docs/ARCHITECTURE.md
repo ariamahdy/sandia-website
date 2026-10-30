@@ -81,13 +81,13 @@ A change to layering, a new dependency, a shared fixture or contract, or a lint/
 | D14 | A private AUT that keeps its session in `sessionStorage` reuses it once per worker and app through `captureSessionStorage`/`restoreSessionStorage` (`src/fixtures/session-storage.ts`), in memory only. A restore writes once per tab; when the AUT rejects it, `clearRestoredSessionStorage` empties the tab so the UI sign-in that follows cannot pick up the stale session | `storageState` covers cookies, localStorage and IndexedDB, not `sessionStorage`; the Playwright docs restore it with `addInitScript` | `tests/unit/fixtures/session-storage.spec.ts` |
 | D15 | `npm run guard` scans the added lines of commits not on a remote yet (`git rev-list HEAD --not --remotes`) against the same denylist, printing commit, file and pattern but never the line | The tracked-file scan missed company terms in an unpushed commit whose file had since been reworded; pushing would have published them | `tests/unit/scripts/guard.spec.ts` |
 | D16 | Every workflow `uses:` is pinned to a full commit SHA with the version as a trailing comment (`<action>@<sha> # <tag>`); local and `docker://` actions are exempt. The comment is the one exception to "no code comments" | A tag can be moved by the action's owner; the comment keeps the version readable and Dependabot updates it | `scripts/guard.mjs`, `tests/unit/scripts/guard.spec.ts` |
+| D17 | Dependabot proposes one PR per npm dependency or workflow action, weekly, keeping exact pins (`versioning-strategy: increase`); TypeScript is ignored (D2) | Exact pins aged silently without an update signal (former R4) | `.github/dependabot.yml` |
 
 ## Risks and limits
 
 - R1: one browser (Chromium) by decision; cross-browser defects are not detected.
 - R2: the public suite is small and runs against a demo app. It proves the architecture, not scale.
 - R3: `playwright.config.ts` configures no sharding, so wall time grows with the suite per worker pool.
-- R4: no automated dependency or advisory updates (no Dependabot or Renovate); exact pins age silently.
 - R5: the CDP maximize path (D3) is Chromium-only and not unit-tested.
 - R6: UAT cannot run in CI because it sits behind the VPN; a self-hosted runner is out of scope.
 - R7: some rules rely on discipline, not tools: `test.step` wrapping of every action, core changes found on UAT going to this repo first, and the porting checklist above.
