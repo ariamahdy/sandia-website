@@ -72,3 +72,37 @@ test('passes a clean unpushed commit', () => {
   expect(runGuard(repo).status).toBe(0);
   rmSync(join(repo.dir, '..'), { recursive: true, force: true });
 });
+
+const commitWorkflow = (repo: Repo, uses: string): void => {
+  repo.write('.github/workflows/ci.yml', `jobs:\n  a:\n    steps:\n      - uses: ${uses}\n`);
+  repo.git('add', '.github/workflows/ci.yml');
+  repo.git('commit', '-q', '-m', 'workflow');
+  repo.git('push', '-q', 'origin', 'main');
+};
+
+test('fails on an action pinned by tag', () => {
+  const repo = makeRepo();
+  commitWorkflow(repo, 'actions/checkout@v7.0.1');
+  const { status, output } = runGuard(repo);
+  expect(status).toBe(1);
+  expect(output).toContain('.github/workflows/ci.yml:4: action actions/checkout@v7.0.1 is not pinned to a commit SHA');
+  rmSync(join(repo.dir, '..'), { recursive: true, force: true });
+});
+
+test('passes an action pinned by a 40-character SHA', () => {
+  const repo = makeRepo();
+  commitWorkflow(repo, `actions/checkout@${'a'.repeat(40)} # v7.0.1`);
+  expect(runGuard(repo).status).toBe(0);
+  rmSync(join(repo.dir, '..'), { recursive: true, force: true });
+});
+
+test('passes local and docker actions', () => {
+  const repo = makeRepo();
+  commitWorkflow(repo, './local-action');
+  repo.write('.github/workflows/two.yml', 'jobs:\n  a:\n    steps:\n      - uses: docker://alpine:3\n');
+  repo.git('add', '.github/workflows/two.yml');
+  repo.git('commit', '-q', '-m', 'docker');
+  repo.git('push', '-q', 'origin', 'main');
+  expect(runGuard(repo).status).toBe(0);
+  rmSync(join(repo.dir, '..'), { recursive: true, force: true });
+});

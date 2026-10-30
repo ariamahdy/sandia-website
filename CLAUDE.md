@@ -34,7 +34,7 @@ Act as a strict senior QA automation architect. Challenge weak designs; do not j
 - Web-first assertions only. Never `waitForTimeout` or manual sleeps. Never fix flakiness with timeouts or more retries.
 - Tests isolated and parallel-safe: no order dependence, no shared mutable state. Auth through the worker fixture and storageState. Setup/teardown data through the API; teardown tolerates data already deleted.
 - No hard-coded secrets or URLs; everything from env/config.
-- Strict types, no `any`, ESLint-clean, compact, no code comments.
+- Strict types, no `any`, ESLint-clean, compact, no code comments (one exception: the version comment after a SHA-pinned action, D16).
 
 ## Conventions
 - Test titles start with an ID: `API-<AREA>-NNN` or `E2E-<AREA>-NNN` (e.g. `API-AUTH-001`, `E2E-ART-002`), unique within the repo.
