@@ -23,7 +23,7 @@ const makeRepo = (): Repo => {
     writeFileSync(join(dir, path), text);
   };
   git('remote', 'add', 'origin', join(root, 'remote.git'));
-  write('scripts/guard.denylist.txt', '\\bforbiddenterm\\b\n');
+  write('scripts/guard.denylist.txt', '\\bforbiddenterm\\b\n^anchoredterm\n');
   write('README.md', 'clean\n');
   git('add', '.');
   git('commit', '-q', '-m', 'init');
@@ -136,5 +136,74 @@ test('names a non-ASCII file that holds a term', () => {
   const { status, output } = runGuard(repo);
   expect(status).toBe(1);
   expect(output).toContain('naïve.md: matches denylist pattern');
+  rmSync(join(repo.dir, '..'), { recursive: true, force: true });
+});
+
+test('keeps scanning a hunk after an added line that starts with ++', () => {
+  const repo = makeRepo();
+  repo.write('notes.md', '++ x\nforbiddenterm\n');
+  repo.git('add', 'notes.md');
+  repo.git('commit', '-q', '-m', 'plus');
+  repo.write('notes.md', 'clean\n');
+  repo.git('commit', '-q', '-am', 'clean');
+  expect(runGuard(repo).status).toBe(1);
+  rmSync(join(repo.dir, '..'), { recursive: true, force: true });
+});
+
+test('finds a term that only a merge commit introduces', () => {
+  const repo = makeRepo();
+  repo.git('switch', '-q', '-c', 'side');
+  repo.write('side.md', 'side\n');
+  repo.git('add', 'side.md');
+  repo.git('commit', '-q', '-m', 'side');
+  repo.git('switch', '-q', 'main');
+  repo.git('merge', '-q', '--no-ff', '--no-commit', 'side');
+  repo.write('merged.md', 'anchoredterm\n');
+  repo.git('add', 'merged.md');
+  repo.git('commit', '-q', '-m', 'merge');
+  repo.write('merged.md', 'clean\n');
+  repo.git('commit', '-q', '-am', 'clean');
+  const { status, output } = runGuard(repo);
+  expect(status).toBe(1);
+  expect(output).toContain('merged.md: matches denylist pattern /^anchoredterm/');
+  rmSync(join(repo.dir, '..'), { recursive: true, force: true });
+});
+
+test('ignores a workflow deleted in the working tree', () => {
+  const repo = makeRepo();
+  commitWorkflow(repo, `actions/checkout@${'a'.repeat(40)} # v7.0.1`);
+  rmSync(join(repo.dir, '.github/workflows/ci.yml'));
+  expect(runGuard(repo).status).toBe(0);
+  rmSync(join(repo.dir, '..'), { recursive: true, force: true });
+});
+
+test('reads quoted action refs', () => {
+  const repo = makeRepo();
+  commitWorkflow(repo, `"actions/checkout@${'a'.repeat(40)}" # v7.0.1`);
+  expect(runGuard(repo).status).toBe(0);
+  rmSync(join(repo.dir, '..'), { recursive: true, force: true });
+});
+
+test('checks actions in flow maps and composite actions', () => {
+  const repo = makeRepo();
+  repo.write('.github/workflows/ci.yml', 'jobs:\n  a:\n    steps:\n      - { uses: actions/checkout@v7.0.1 }\n');
+  repo.write('.github/actions/setup/action.yml', 'runs:\n  steps:\n    - uses: actions/setup-node@v7.1.0\n');
+  repo.git('add', '.github');
+  repo.git('commit', '-q', '-m', 'actions');
+  repo.git('push', '-q', 'origin', 'main');
+  const { status, output } = runGuard(repo);
+  expect(status).toBe(1);
+  expect(output).toContain('.github/workflows/ci.yml:4: action actions/checkout@v7.0.1');
+  expect(output).toContain('.github/actions/setup/action.yml:3: action actions/setup-node@v7.1.0');
+  rmSync(join(repo.dir, '..'), { recursive: true, force: true });
+});
+
+test('treats a commit pushed only to another remote as unpushed', () => {
+  const repo = makeRepo();
+  repo.git('init', '-q', '--bare', join(repo.dir, '..', 'mirror.git'));
+  repo.git('remote', 'add', 'mirror', join(repo.dir, '..', 'mirror.git'));
+  const sha = addAndRemove(repo);
+  repo.git('push', '-q', 'mirror', 'main');
+  expect(runGuard(repo).output).toContain(`${sha} notes.md: matches denylist pattern`);
   rmSync(join(repo.dir, '..'), { recursive: true, force: true });
 });

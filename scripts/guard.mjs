@@ -62,7 +62,7 @@ const hasHead = (() => {
   }
 })();
 const git = (...args) => execFileSync('git', ['-c', 'core.quotePath=false', ...args], { cwd: root, encoding: 'utf8', maxBuffer: 1 << 28 });
-const unpushed = hasHead ? git('rev-list', 'HEAD', '--branches', '--not', '--remotes').split('\n').filter(Boolean) : [];
+const unpushed = hasHead ? git('rev-list', 'HEAD', '--branches', '--not', '--remotes=origin').split('\n').filter(Boolean) : [];
 
 for (const sha of unpushed) {
   let file = '';
