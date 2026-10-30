@@ -68,7 +68,7 @@ for (const sha of unpushed) {
   let file = '';
   let previous = '';
   const hits = new Set();
-  for (const line of git('show', '--format=', '--unified=0', '--no-color', '--no-ext-diff', '--no-textconv', '--src-prefix=a/', '--dst-prefix=b/', sha).split('\n')) {
+  for (const line of git('show', '--format=', '--diff-merges=first-parent', '--unified=0', '--no-color', '--no-ext-diff', '--no-textconv', '--src-prefix=a/', '--dst-prefix=b/', sha).split('\n')) {
     const header = line.startsWith('+++ ') && previous.startsWith('--- ');
     previous = line;
     if (header) {
