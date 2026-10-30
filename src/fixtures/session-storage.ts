@@ -17,6 +17,8 @@ export const captureSessionStorage = async (page: Page): Promise<SessionSnapshot
 });
 
 export const restoreSessionStorage = async (context: BrowserContext, snapshot: SessionSnapshot): Promise<void> => {
+  const origin = new URL(snapshot.url).origin;
+  if (origin === 'null') throw new Error(`cannot restore session storage for an opaque origin (${new URL(snapshot.url).protocol})`);
   await context.addInitScript(
     ({ origin, entries, done }) => {
       if ((globalThis as unknown as { location: { origin: string } }).location.origin !== origin) return;
@@ -24,7 +26,7 @@ export const restoreSessionStorage = async (context: BrowserContext, snapshot: S
       for (const [key, value] of Object.entries(entries)) sessionStorage.setItem(key, value);
       sessionStorage.setItem(done, '1');
     },
-    { origin: new URL(snapshot.url).origin, entries: snapshot.entries, done: marker },
+    { origin, entries: snapshot.entries, done: marker },
   );
 };
 

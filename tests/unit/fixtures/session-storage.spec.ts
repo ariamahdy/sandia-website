@@ -87,3 +87,9 @@ test('captures only the app entries after a restore', async ({ browser }) => {
   expect(await captureSessionStorage(page)).toEqual({ url: appUrl, entries: { a: '1' } });
   await context.close();
 });
+
+test('refuses a snapshot from an opaque origin', async ({ browser }) => {
+  const context = await browser.newContext();
+  await expect(restoreSessionStorage(context, { url: 'about:blank', entries: { a: '1' } })).rejects.toThrow(/opaque origin/);
+  await context.close();
+});

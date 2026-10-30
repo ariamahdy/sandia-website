@@ -43,11 +43,11 @@ for (const file of tracked) {
     });
 }
 
-for (const file of tracked.filter((f) => /^\.github\/workflows\/[^/]+\.ya?ml$/.test(f))) {
+for (const file of tracked.filter((f) => /^\.github\/(workflows\/[^/]+|actions\/.+\/action)\.ya?ml$/.test(f) && existsSync(join(root, f)))) {
   readFileSync(join(root, file), 'utf8')
     .split('\n')
     .forEach((line, index) => {
-      const ref = /^\s*-?\s*uses:\s*(\S+)/.exec(line)?.[1];
+      const ref = /(?:^\s*-?\s*|[{,]\s*)uses:\s*["']?([^"'\s,}#]+)/.exec(line)?.[1];
       if (ref === undefined || ref.startsWith('./') || ref.startsWith('docker://') || /@[0-9a-f]{40}$/.test(ref)) return;
       problems.push(`${file}:${String(index + 1)}: action ${ref} is not pinned to a commit SHA`);
     });
@@ -62,13 +62,16 @@ const hasHead = (() => {
   }
 })();
 const git = (...args) => execFileSync('git', ['-c', 'core.quotePath=false', ...args], { cwd: root, encoding: 'utf8', maxBuffer: 1 << 28 });
-const unpushed = hasHead ? git('rev-list', 'HEAD', '--branches', '--not', '--remotes').split('\n').filter(Boolean) : [];
+const unpushed = hasHead ? git('rev-list', 'HEAD', '--branches', '--not', '--remotes=origin').split('\n').filter(Boolean) : [];
 
 for (const sha of unpushed) {
   let file = '';
+  let previous = '';
   const hits = new Set();
-  for (const line of git('show', '--format=', '--unified=0', '--no-color', '--no-ext-diff', '--no-textconv', '--src-prefix=a/', '--dst-prefix=b/', sha).split('\n')) {
-    if (line.startsWith('+++ ')) {
+  for (const line of git('show', '--format=', '--diff-merges=first-parent', '--unified=0', '--no-color', '--no-ext-diff', '--no-textconv', '--src-prefix=a/', '--dst-prefix=b/', sha).split('\n')) {
+    const header = line.startsWith('+++ ') && previous.startsWith('--- ');
+    previous = line;
+    if (header) {
       file = line.startsWith('+++ b/') ? line.slice(6) : '';
       continue;
     }
