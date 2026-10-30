@@ -66,9 +66,12 @@ const unpushed = hasHead ? git('rev-list', 'HEAD', '--branches', '--not', '--rem
 
 for (const sha of unpushed) {
   let file = '';
+  let previous = '';
   const hits = new Set();
   for (const line of git('show', '--format=', '--unified=0', '--no-color', '--no-ext-diff', '--no-textconv', '--src-prefix=a/', '--dst-prefix=b/', sha).split('\n')) {
-    if (line.startsWith('+++ ')) {
+    const header = line.startsWith('+++ ') && previous.startsWith('--- ');
+    previous = line;
+    if (header) {
       file = line.startsWith('+++ b/') ? line.slice(6) : '';
       continue;
     }
