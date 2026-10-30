@@ -5,19 +5,19 @@ import { join, resolve } from 'node:path';
 import { expect, test } from '@playwright/test';
 
 const guard = resolve('scripts/guard.mjs');
+const isolatedConfig = join(mkdtempSync(join(tmpdir(), 'guard-config-')), 'gitconfig');
+writeFileSync(isolatedConfig, '');
+const env = { ...process.env, GIT_CONFIG_GLOBAL: isolatedConfig, GIT_CONFIG_NOSYSTEM: '1' };
 
 type Repo = { dir: string; git: (...args: string[]) => string; write: (path: string, text: string) => void };
 
 const makeRepo = (): Repo => {
   const root = mkdtempSync(join(tmpdir(), 'guard-'));
   const dir = join(root, 'work');
-  execFileSync('git', ['init', '-q', '--bare', join(root, 'remote.git')]);
-  execFileSync('git', ['init', '-q', '-b', 'main', dir]);
+  execFileSync('git', ['init', '-q', '--bare', join(root, 'remote.git')], { env });
+  execFileSync('git', ['init', '-q', '-b', 'main', dir], { env });
   const git = (...args: string[]): string =>
-    execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t.test', '-c', 'core.hooksPath=/dev/null', ...args], {
-      cwd: dir,
-      encoding: 'utf8',
-    });
+    execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t.test', ...args], { cwd: dir, encoding: 'utf8', env });
   const write = (path: string, text: string): void => {
     mkdirSync(join(dir, path, '..'), { recursive: true });
     writeFileSync(join(dir, path), text);
@@ -32,7 +32,7 @@ const makeRepo = (): Repo => {
 };
 
 const runGuard = (repo: Repo) => {
-  const result = spawnSync('node', [guard], { cwd: repo.dir, encoding: 'utf8' });
+  const result = spawnSync('node', [guard], { cwd: repo.dir, encoding: 'utf8', env });
   return { status: result.status, output: `${result.stdout}${result.stderr}` };
 };
 
@@ -104,5 +104,37 @@ test('passes local and docker actions', () => {
   repo.git('commit', '-q', '-m', 'docker');
   repo.git('push', '-q', 'origin', 'main');
   expect(runGuard(repo).status).toBe(0);
+  rmSync(join(repo.dir, '..'), { recursive: true, force: true });
+});
+
+test('scans an unpushed side branch while main is checked out', () => {
+  const repo = makeRepo();
+  repo.git('switch', '-q', '-c', 'side');
+  const sha = addAndRemove(repo);
+  repo.git('switch', '-q', 'main');
+  const { status, output } = runGuard(repo);
+  expect(status).toBe(1);
+  expect(output).toContain(`${sha} notes.md: matches denylist pattern`);
+  rmSync(join(repo.dir, '..'), { recursive: true, force: true });
+});
+
+test('finds a term when the repo sets diff.noprefix', () => {
+  const repo = makeRepo();
+  repo.git('config', 'diff.noprefix', 'true');
+  const sha = addAndRemove(repo);
+  expect(runGuard(repo).output).toContain(`${sha} notes.md: matches denylist pattern`);
+  rmSync(join(repo.dir, '..'), { recursive: true, force: true });
+});
+
+test('names a non-ASCII file that holds a term', () => {
+  const repo = makeRepo();
+  repo.write('naïve.md', 'forbiddenterm\n');
+  repo.git('add', 'naïve.md');
+  repo.git('commit', '-q', '-m', 'non-ascii');
+  repo.write('naïve.md', 'clean\n');
+  repo.git('commit', '-q', '-am', 'clean');
+  const { status, output } = runGuard(repo);
+  expect(status).toBe(1);
+  expect(output).toContain('naïve.md: matches denylist pattern');
   rmSync(join(repo.dir, '..'), { recursive: true, force: true });
 });
