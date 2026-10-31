@@ -2,3 +2,4 @@
 cd .. || exit 1
 npm run typecheck || exit 1
 npx eslint --max-warnings=0 private || exit 1
+npm run test:uat:unit || exit 1

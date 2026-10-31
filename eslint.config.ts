@@ -107,4 +107,5 @@ export default defineConfig(
   restrict(['private/src/pages/**/*.ts'], ['fixtures'], [playwrightExpectOnly], ['fixtures']),
   restrict(['private/src/fixtures/**/*.ts'], [], [], []),
   restrict(['private/tests/**/*.ts'], ['api', 'components', 'pages'], [playwrightBanned], ['components', 'pages']),
+  restrict(['private/tests/unit/**/*.ts'], [], [], []),
 );
