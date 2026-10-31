@@ -71,6 +71,30 @@ test('keeps labels, messages, buttons and the sections around the snapshot', () 
   expect(masked).toContain("  await page.getByRole('cell', { name: 'x' }).click();");
 });
 
+test('masks a snapshot that follows the error details without its own heading', () => {
+  const text = [
+    '# Error details',
+    '',
+    '```',
+    'Error: expect(locator).toBeVisible() failed',
+    '```',
+    '',
+    '```yaml',
+    '- row "Jane Roe":',
+    '  - cell "Jane Roe"',
+    '- textbox "Email": jane@example.test',
+    '```',
+    '',
+  ].join('\r\n');
+  const { file, stdout } = run(text);
+  const masked = readFileSync(file, 'utf8');
+
+  expect(stdout).toContain('masked 3 values');
+  expect(masked).not.toContain('Jane Roe');
+  expect(masked).not.toContain('jane@example.test');
+  expect(masked).toContain('\r\n');
+});
+
 test('leaves a file without a page snapshot unchanged', () => {
   const text = '# Error details\n\nError: boom\n';
   const { file, status, stdout } = run(text);
