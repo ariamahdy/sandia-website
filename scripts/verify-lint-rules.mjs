@@ -82,6 +82,12 @@ const cases = [
     expect: '@typescript-eslint/no-restricted-imports',
   },
   {
+    name: 'private unit tests may import @playwright/test and pages',
+    filePath: 'private/tests/unit/x.spec.ts',
+    code: "import { test, expect } from '@playwright/test';\nimport { LoginPage } from '@uat/src/pages';\ntest('a', () => {\n  expect(LoginPage).toBeDefined();\n});\n",
+    expect: null,
+  },
+  {
     name: 'unit tests may import @playwright/test',
     filePath: 'tests/unit/x.spec.ts',
     code: "import { test, expect } from '@playwright/test';\ntest('a', () => {\n  expect(1).toBe(1);\n});\n",

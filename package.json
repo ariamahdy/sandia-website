@@ -13,6 +13,7 @@
     "verify:lint": "node scripts/verify-lint-rules.mjs",
     "test": "playwright test",
     "test:unit": "playwright test --project=unit",
+    "test:uat:unit": "playwright test --project=uat-unit",
     "test:e2e": "playwright test --project=conduit-e2e",
     "test:api": "playwright test --project=conduit-api",
     "test:stability": "playwright test --repeat-each=5 --workers=4 --project=conduit-api --project=conduit-e2e",

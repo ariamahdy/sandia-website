@@ -23,5 +23,9 @@ export const buildProjects = ({ aut, hasPrivate, mutating = false }: BuildOption
   if (aut === 'uat' && !hasPrivate) {
     throw new ConfigError(['AUT: "uat" requires the private/ directory, which is missing']);
   }
-  return [{ name: 'unit', testDir: 'tests/unit' }, ...autProjects(aut, aut === 'uat' ? 'private/tests' : 'tests', mutating)];
+  return [
+    { name: 'unit', testDir: 'tests/unit' },
+    ...(hasPrivate ? [{ name: 'uat-unit', testDir: 'private/tests/unit' }] : []),
+    ...autProjects(aut, aut === 'uat' ? 'private/tests' : 'tests', mutating),
+  ];
 };

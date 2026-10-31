@@ -73,6 +73,7 @@ Test titles start with an ID, `API-<AREA>-NNN` or `E2E-<AREA>-NNN`, for example 
 | `npm run lint` | ESLint, zero warnings allowed |
 | `npm run verify:lint` | Proves the layering and test rules still fire |
 | `npm run test:unit` | Pure core logic, no browser or AUT |
+| `npm run test:uat:unit` | Component tests of `private/` (only when it exists) |
 | `npm run test:api` | Conduit API suite |
 | `npm run test:e2e` | Conduit UI suite (Chromium) |
 | `npm run test:stability` | API + UI suites, `--repeat-each=5 --workers=4` |

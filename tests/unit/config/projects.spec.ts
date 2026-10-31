@@ -13,6 +13,16 @@ test('conduit-e2e runs in chromium', () => {
   expect(e2e?.use).toMatchObject({ browserName: 'chromium' });
 });
 
+test('private/ adds a uat-unit project for its component tests', () => {
+  const uatUnit = buildProjects({ aut: 'conduit', hasPrivate: true }).find((p) => p.name === 'uat-unit');
+  expect(uatUnit?.testDir).toBe('private/tests/unit');
+  expect(names('uat', true)).toContain('uat-unit');
+});
+
+test('no uat-unit project without private/', () => {
+  expect(names('conduit', false)).not.toContain('uat-unit');
+});
+
 test('uat without private/ fails with a clear error', () => {
   expect(() => buildProjects({ aut: 'uat', hasPrivate: false })).toThrow(ConfigError);
   expect(() => buildProjects({ aut: 'uat', hasPrivate: false })).toThrow(/private\//);
