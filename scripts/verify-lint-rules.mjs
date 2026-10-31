@@ -84,7 +84,7 @@ const cases = [
   {
     name: 'private unit tests may import @playwright/test and pages',
     filePath: 'private/tests/unit/x.spec.ts',
-    code: "import { test, expect } from '@playwright/test';\nimport { LoginPage } from '@uat/src/pages';\ntest('a', () => {\n  expect(LoginPage).toBeDefined();\n});\n",
+    code: "import { test, expect } from '@playwright/test';\nimport type { LoginPage } from '@uat/src/pages';\nexport type Page = LoginPage;\ntest('a', () => {\n  expect(1).toBe(1);\n});\n",
     expect: null,
   },
   {
