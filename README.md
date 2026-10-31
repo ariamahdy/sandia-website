@@ -78,6 +78,7 @@ Test titles start with an ID, `API-<AREA>-NNN` or `E2E-<AREA>-NNN`, for example 
 | `npm run test:stability` | API + UI suites, `--repeat-each=5 --workers=4` |
 | `npm run aut:up` / `aut:down` | Start / stop the Conduit AUT |
 | `npm run guard` | Leak guard (also runs on `git push`) |
+| `npm run mask:snapshot -- <file>` | Masks the page data in a Playwright error file before sharing it |
 
 ## Architecture
 
