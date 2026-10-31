@@ -18,14 +18,14 @@ const named = /^(\s*- (?:cell|row|gridcell|option|listitem) )"(?:[^"\\]|\\.)*"/;
 const valued = /^(\s*- (?:textbox|cell|gridcell|combobox)(?: "(?:[^"\\]|\\.)*")?(?: \[[^\]]*\])*): .+$/;
 
 let inSnapshot = false;
-let seenHeading = false;
+let snapshots = 0;
 let masked = 0;
 const lines = text.split(/(?<=\n)/).map((line) => {
   const body = line.replace(/\r?\n$/, '');
   const end = line.slice(body.length);
-  if (body.startsWith('# ')) seenHeading = body === '# Page snapshot';
-  if (seenHeading && body.startsWith('```')) {
+  if (body.startsWith('```')) {
     inSnapshot = !inSnapshot && body.startsWith('```yaml');
+    if (inSnapshot) snapshots += 1;
     return line;
   }
   if (!inSnapshot) return line;
@@ -35,7 +35,7 @@ const lines = text.split(/(?<=\n)/).map((line) => {
   return next + end;
 });
 
-if (!text.includes('# Page snapshot')) {
+if (snapshots === 0) {
   console.log(`mask-snapshot: no page snapshot in ${file}, left unchanged`);
 } else {
   writeFileSync(file, lines.join(''));
