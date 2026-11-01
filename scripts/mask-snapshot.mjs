@@ -1,4 +1,5 @@
 import { readFileSync, writeFileSync } from 'node:fs';
+import { maskSnapshot } from './lib/mask.mjs';
 
 const file = process.argv[2];
 if (!file) {
@@ -14,30 +15,10 @@ try {
   process.exit(1);
 }
 
-const named = /^(\s*- (?:cell|row|gridcell|option|listitem) )"(?:[^"\\]|\\.)*"/;
-const valued = /^(\s*- (?:textbox|cell|gridcell|combobox)(?: "(?:[^"\\]|\\.)*")?(?: \[[^\]]*\])*): .+$/;
-
-let inSnapshot = false;
-let snapshots = 0;
-let masked = 0;
-const lines = text.split(/(?<=\n)/).map((line) => {
-  const body = line.replace(/\r?\n$/, '');
-  const end = line.slice(body.length);
-  if (body.startsWith('```')) {
-    inSnapshot = !inSnapshot && body.startsWith('```yaml');
-    if (inSnapshot) snapshots += 1;
-    return line;
-  }
-  if (!inSnapshot) return line;
-  let next = body.replace(named, (_, head) => `${head}"<masked>"`);
-  next = next.replace(valued, (_, head) => `${head}: <masked>`);
-  if (next !== body) masked += 1;
-  return next + end;
-});
-
-if (snapshots === 0) {
+const result = maskSnapshot(text);
+if (result.snapshots === 0) {
   console.log(`mask-snapshot: no page snapshot in ${file}, left unchanged`);
 } else {
-  writeFileSync(file, lines.join(''));
-  console.log(`mask-snapshot: masked ${String(masked)} values in ${file}`);
+  writeFileSync(file, result.text);
+  console.log(`mask-snapshot: masked ${String(result.masked)} values in ${file}`);
 }
