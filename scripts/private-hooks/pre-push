@@ -1,0 +1,2 @@
+#!/bin/sh
+node ../scripts/private-guard.mjs || exit 1
