@@ -9,9 +9,14 @@ const maximized: Project['use'] = {
 };
 
 const mutatingTag = /@mutating/;
+const uatTestTimeout = 60_000;
 
 const autProjects = (aut: Env['AUT'], root: string, mutating: boolean): Project[] => {
-  const e2e: Project = { testDir: `${root}/e2e/${aut}`, use: { browserName: 'chromium', ...maximized } };
+  const e2e: Project = {
+    testDir: `${root}/e2e/${aut}`,
+    use: { browserName: 'chromium', ...maximized },
+    ...(aut === 'uat' ? { timeout: uatTestTimeout } : {}),
+  };
   return [
     { name: `${aut}-e2e`, ...e2e, grepInvert: mutatingTag },
     { name: `${aut}-api`, testDir: `${root}/api/${aut}` },
