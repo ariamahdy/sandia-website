@@ -77,6 +77,8 @@ Test titles start with an ID, `API-<AREA>-NNN` or `E2E-<AREA>-NNN`, for example 
 | `npm run test:api` | Conduit API suite |
 | `npm run test:e2e` | Conduit UI suite (Chromium) |
 | `npm run test:stability` | API + UI suites, `--repeat-each=5 --workers=4` |
+| `npm run test:uat` | Private UAT suite without `@mutating` tests; loads `private/.env`, Playwright options after `--` (in PowerShell `'--'`) |
+| `npm run test:uat:mutating` | Only the `@mutating` UAT tests, one worker; they change shared records |
 | `npm run aut:up` / `aut:down` | Start / stop the Conduit AUT |
 | `npm run guard` | Leak guard (also runs on `git push`) |
 | `npm run mask:snapshot -- <file>` | Masks the page data in a Playwright error file before sharing it |
