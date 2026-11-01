@@ -42,7 +42,7 @@ Leak protection:
 - ESLint forbids core code from importing `@uat/*` or `private/`.
 - `npm run guard` (pre-push and CI) fails if `private/` or an env file other than `.env.example` is tracked, or if tracked text matches `scripts/guard.denylist.txt` merged with `private/guard.denylist.txt`. It also scans the added lines of every commit not on a remote yet, so a term added and removed again before a push still fails it.
 - CI runs on a clean clone without `private/`, plus gitleaks.
-- `npm install` (`prepare`) points the `private` repo's `core.hooksPath` at `scripts/private-hooks`, whose pre-commit runs `npm run typecheck`, ESLint on all of `private/`, cspell (`cspell@8.19.4` through `npx`, with `private/cspell.json`) and `npm run test:uat:unit`; without `private/`, or outside a git checkout, it is skipped.
+- `npm install` (`prepare`) points the `private` repo's `core.hooksPath` at `scripts/private-hooks`, whose pre-commit runs `npm run typecheck`, ESLint on all of `private/`, cspell (`cspell@10.4.0` through `npx`, with `private/cspell.json`) and `npm run test:uat:unit`; without `private/`, or outside a git checkout, it is skipped.
 
 
 ## Porting a page from an older suite
