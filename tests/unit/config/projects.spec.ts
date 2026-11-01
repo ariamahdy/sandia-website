@@ -42,6 +42,13 @@ test('e2e projects start at a fixed window size that headed runs then maximize',
   }
 });
 
+test('uat e2e and mutating projects get a 60 s test timeout, conduit keeps the default', () => {
+  const uat = buildProjects({ aut: 'uat', hasPrivate: true, mutating: true });
+  expect(uat.find((p) => p.name === 'uat-e2e')?.timeout).toBe(60_000);
+  expect(uat.find((p) => p.name === 'uat-mutating')?.timeout).toBe(60_000);
+  expect(buildProjects({ aut: 'conduit', hasPrivate: false }).find((p) => p.name === 'conduit-e2e')?.timeout).toBeUndefined();
+});
+
 test('e2e projects skip @mutating tests', () => {
   const e2e = buildProjects({ aut: 'uat', hasPrivate: true }).find((p) => p.name === 'uat-e2e');
   expect(e2e?.grepInvert).toEqual(/@mutating/);
