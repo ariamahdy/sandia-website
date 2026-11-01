@@ -23,6 +23,7 @@
     "aut:down": "docker compose -f infra/conduit/compose.yml --env-file .env down -v",
     "guard": "node scripts/guard.mjs",
     "mask:snapshot": "node scripts/mask-snapshot.mjs",
+    "error:share": "node scripts/error-share.mjs",
     "prepare": "simple-git-hooks && node scripts/setup-private-hooks.mjs"
   },
   "devDependencies": {

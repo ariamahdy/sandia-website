@@ -7,3 +7,4 @@ playwright-report/
 test-results/
 blob-report/
 .DS_Store
+shared-errors/
