@@ -107,3 +107,64 @@ test('leaves a file without a page snapshot unchanged', () => {
 test('fails on a missing file', () => {
   expect(run().status).toBe(1);
 });
+
+const nested = [
+  '```yaml',
+  '- table [ref=e1]:',
+  '  - rowgroup [ref=e2]:',
+  '    - row "Jane Roe" [ref=e3]:',
+  '      - cell "Jane Roe" [ref=e4]:',
+  '        - link "Jane Roe" [ref=e5] [cursor=pointer]:',
+  '          - /url: /order/123?token=abc',
+  '      - cell [ref=e6]:',
+  '        - generic [ref=e7]: Main Street 1',
+  '  - heading "Contract 99887766" [level=5] [ref=e8]',
+  '  - paragraph [ref=e9]: ID 3100000000000001',
+  '  - link "Articles" [ref=e10]:',
+  '    - /url: /articles',
+  '  - link "Report" [ref=e11]:',
+  '    - /url: https://aut.example.test/report/2026/detail?id=7',
+  '```',
+  '',
+].join('\n');
+
+test('masks every line nested under a masked row or cell', () => {
+  const { file } = run(nested);
+  const masked = readFileSync(file, 'utf8');
+
+  expect(masked).not.toContain('Jane Roe');
+  expect(masked).not.toContain('Main Street');
+  expect(masked).toContain('        - link "<masked>" [ref=e5] [cursor=pointer]:');
+  expect(masked).toContain('        - generic [ref=e7]: <masked>');
+  expect(masked).toContain('      - cell [ref=e6]:');
+});
+
+test('keeps the path of a link but masks its query and segments with digits', () => {
+  const { file } = run(nested);
+  const masked = readFileSync(file, 'utf8');
+
+  expect(masked).toContain('          - /url: /order/<masked>?<masked>');
+  expect(masked).toContain('    - /url: /articles');
+  expect(masked).toContain('    - /url: https://aut.example.test/report/<masked>/detail?<masked>');
+  expect(masked).not.toContain('token=abc');
+});
+
+test('masks long digit runs anywhere in the snapshot and keeps the words around them', () => {
+  const { file } = run(nested);
+  const masked = readFileSync(file, 'utf8');
+
+  expect(masked).toContain('  - heading "Contract <masked>" [level=5] [ref=e8]');
+  expect(masked).toContain('  - paragraph [ref=e9]: ID <masked>');
+  expect(masked).toContain('  - link "Articles" [ref=e10]:');
+});
+
+test('keeps the column headers of a header row and the lines after the table', () => {
+  const text = ['```yaml', '- row "Order Name":', '  - columnheader "Order"', '  - columnheader "Name"', '- button "Search"', '```', ''].join('\n');
+  const { file } = run(text);
+  const masked = readFileSync(file, 'utf8');
+
+  expect(masked).toContain('- row "<masked>":');
+  expect(masked).toContain('  - columnheader "Order"');
+  expect(masked).toContain('  - columnheader "Name"');
+  expect(masked).toContain('- button "Search"');
+});
