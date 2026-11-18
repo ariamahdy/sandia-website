@@ -18,10 +18,12 @@ for (const file of tracked) {
 }
 
 const envText = existsSync('.env') ? readFileSync('.env', 'utf8') : '';
-const password = /^AUTH_PASSWORD=(.*)$/m.exec(envText)?.[1]?.trim().replace(/^(['"])(.*)\1$/, '$2') ?? '';
+const passwords = [...envText.matchAll(/^([A-Z0-9_]*PASSWORD)=(.*)$/gm)]
+  .map(([, key = '', value = '']) => ({ key, value: value.trim().replace(/^(['"])(.*)\1$/, '$2') }))
+  .filter(({ value }) => value.length >= 6);
 let note = '';
-if (password.length < 6) {
-  note = ', password check skipped (no AUTH_PASSWORD of 6+ characters in .env)';
+if (passwords.length === 0) {
+  note = ', password check skipped (no *_PASSWORD of 6+ characters in .env)';
 } else {
   const hasHead = (() => {
     try {
@@ -36,7 +38,11 @@ if (password.length < 6) {
     let file = '';
     for (const line of git('show', '--format=', '--unified=0', '--no-color', sha).split('\n')) {
       if (line.startsWith('+++ ')) file = line.replace(/^\+\+\+ (b\/)?/, '');
-      else if (line.startsWith('+') && line.includes(password)) problems.push(`${sha.slice(0, 7)} ${file}: adds the AUTH_PASSWORD value`);
+      else if (line.startsWith('+')) {
+        for (const { key, value } of passwords) {
+          if (line.includes(value)) problems.push(`${sha.slice(0, 7)} ${file}: adds the ${key} value`);
+        }
+      }
     }
   }
 }

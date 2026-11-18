@@ -88,6 +88,42 @@ const cases = [
     expect: null,
   },
   {
+    name: 'private data must not import pages',
+    filePath: 'private/src/data/x.ts',
+    code: "import { LoginPage } from '@uat/src/pages';\nexport const p = LoginPage;\n",
+    expect: '@typescript-eslint/no-restricted-imports',
+  },
+  {
+    name: 'private data must not import @playwright/test',
+    filePath: 'private/src/data/x.ts',
+    code: "import type { Page } from '@playwright/test';\nexport type P = Page;\n",
+    expect: '@typescript-eslint/no-restricted-imports',
+  },
+  {
+    name: 'private api must not import pages',
+    filePath: 'private/src/api/x.ts',
+    code: "import { LoginPage } from '@uat/src/pages';\nexport const p = LoginPage;\n",
+    expect: '@typescript-eslint/no-restricted-imports',
+  },
+  {
+    name: 'private api must not import @playwright/test values',
+    filePath: 'private/src/api/x.ts',
+    code: "import { test } from '@playwright/test';\nexport const t = test;\n",
+    expect: '@typescript-eslint/no-restricted-imports',
+  },
+  {
+    name: 'private api may import private config',
+    filePath: 'private/src/api/x.ts',
+    code: "import { requireVar } from '@uat/src/config/uat-env';\nexport const r = requireVar;\n",
+    expect: null,
+  },
+  {
+    name: 'private components must not import private api',
+    filePath: 'private/src/components/x.ts',
+    code: "import type { X } from '@uat/src/api/uat-db';\nexport type Y = X;\n",
+    expect: '@typescript-eslint/no-restricted-imports',
+  },
+  {
     name: 'unit tests may import @playwright/test',
     filePath: 'tests/unit/x.spec.ts',
     code: "import { test, expect } from '@playwright/test';\ntest('a', () => {\n  expect(1).toBe(1);\n});\n",

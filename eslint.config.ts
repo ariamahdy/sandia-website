@@ -5,7 +5,7 @@ import playwright from 'eslint-plugin-playwright';
 import tseslint from 'typescript-eslint';
 
 type Layer = 'config' | 'utils' | 'api' | 'components' | 'data' | 'pages' | 'fixtures';
-type UatLayer = 'config' | 'components' | 'pages' | 'fixtures';
+type UatLayer = 'config' | 'data' | 'api' | 'components' | 'pages' | 'fixtures';
 type RestrictedPath = { name: string; message: string; allowTypeImports?: boolean; allowImportNames?: string[] };
 
 const playwrightTypesOnly: RestrictedPath = {
@@ -18,6 +18,10 @@ const playwrightExpectOnly: RestrictedPath = {
   allowTypeImports: true,
   allowImportNames: ['expect'],
   message: 'Components and pages may import only expect and types from @playwright/test.',
+};
+const playwrightUnused: RestrictedPath = {
+  name: '@playwright/test',
+  message: 'Data builders are plain functions and must not depend on Playwright.',
 };
 const playwrightBanned: RestrictedPath = {
   name: '@playwright/test',
@@ -101,11 +105,13 @@ export default defineConfig(
     ['private/src/config/**/*.ts'],
     ['utils', 'api', 'components', 'data', 'pages', 'fixtures'],
     [playwrightTypesOnly],
-    ['components', 'pages', 'fixtures'],
+    ['data', 'api', 'components', 'pages', 'fixtures'],
   ),
-  restrict(['private/src/components/**/*.ts'], ['api', 'pages', 'fixtures'], [playwrightExpectOnly], ['pages', 'fixtures']),
+  restrict(['private/src/data/**/*.ts'], ['api', 'components', 'pages', 'fixtures'], [playwrightUnused], ['api', 'components', 'pages', 'fixtures']),
+  restrict(['private/src/api/**/*.ts'], ['components', 'pages', 'fixtures'], [playwrightTypesOnly], ['components', 'pages', 'fixtures']),
+  restrict(['private/src/components/**/*.ts'], ['api', 'pages', 'fixtures'], [playwrightExpectOnly], ['api', 'pages', 'fixtures']),
   restrict(['private/src/pages/**/*.ts'], ['fixtures'], [playwrightExpectOnly], ['fixtures']),
   restrict(['private/src/fixtures/**/*.ts'], [], [], []),
-  restrict(['private/tests/**/*.ts'], ['api', 'components', 'pages'], [playwrightBanned], ['components', 'pages']),
+  restrict(['private/tests/**/*.ts'], ['api', 'components', 'pages'], [playwrightBanned], ['api', 'components', 'pages']),
   restrict(['private/tests/unit/**/*.ts'], [], [], []),
 );
