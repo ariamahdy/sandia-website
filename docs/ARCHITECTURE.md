@@ -47,7 +47,7 @@ Leak protection:
 
 ## Porting a page from an older suite
 
-A Katalon or Selenium script is a list of intended actions, not a description of the page: it can miss clicks, and its locators reflect another tool's view of the DOM. Port from the real page.
+A script from an older tool is a list of intended actions, not a description of the page: it can miss clicks, and its locators reflect another tool's view of the DOM. Port from the real page.
 
 1. Read the old script and list every action, including each confirmation and each submit inside a dialog or panel. A form that is filled but never submitted is a missing step, not a quirk to copy.
 2. Take locators from the real page: `npx playwright codegen <url>` on a machine that reaches the AUT, or the page snapshot in `error-context.md` from a first run. Never copy an old XPath or CSS selector without checking it against that snapshot.
