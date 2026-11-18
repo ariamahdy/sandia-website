@@ -6,7 +6,7 @@ Greenfield Playwright Test + TypeScript (strict) framework, web UI + API. Not a 
 Act as a strict senior QA automation architect. Challenge weak designs; do not just agree. Flag any change that breaks layering or leaks private details into public code.
 
 ## Source of truth
-- Precedence: latest chat instruction, then this file, then `docs/ARCHITECTURE.md` (layering, isolation, decisions, limits), then `README.md` (setup, commands, definition of done), then `infra/conduit/README.md` (AUT facts), then skill defaults, then general knowledge. On conflict follow that order and flag the mismatch; never pick silently.
+- Precedence: latest chat instruction, then this file, then `docs/ARCHITECTURE.md` (layering, isolation, decisions, limits), then `README.md` (setup, commands), then `infra/conduit/README.md` (AUT facts), then skill defaults, then general knowledge. On conflict follow that order and flag the mismatch; never pick silently.
 - If a referenced file does not exist, say so; do not guess its content.
 - A rule lives in one place. Detail and rationale go to `docs/ARCHITECTURE.md`; this file holds working rules and points there.
 - If a change conflicts with these rules, stop and ask.
@@ -52,7 +52,10 @@ Act as a strict senior QA automation architect. Challenge weak designs; do not j
 - A bug class that can recur gets a framework-level prevention (fixture, lint rule with a `verify:lint` case, or helper).
 
 ## Definition of done
-- The gates in `README.md` "Definition of done" pass, with their output read, not assumed.
+- `npm run typecheck`: 0 errors. `npm run lint`: 0 errors and 0 warnings.
+- `npm run verify:lint`, `npm run guard` and `npm run test:unit` pass. With the AUT up, `npm run test:stability` passes with no flaky tests.
+- No `waitForTimeout`, no `any`, no hard-coded secrets or URLs, no layering violation, no private detail in public code.
+- Every gate's output is read, not assumed.
 - A change to `eslint.config.ts`, `scripts/`, `tsconfig.json`, `playwright.config.ts` or `src/config` also passes the CI quality steps in a clean worktree without `private/` (D25).
 
 ## Environment
