@@ -124,6 +124,24 @@ const cases = [
     expect: '@typescript-eslint/no-restricted-imports',
   },
   {
+    name: 'private e2e tests must not import private api',
+    filePath: 'private/tests/e2e/x.spec.ts',
+    code: "import type { UatDatabases } from '@uat/src/api/uat-db';\nexport type D = UatDatabases;\n",
+    expect: '@typescript-eslint/no-restricted-imports',
+  },
+  {
+    name: 'private data must not import components',
+    filePath: 'private/src/data/x.ts',
+    code: "import { escapeRegExp } from '@uat/src/components';\nexport const e = escapeRegExp;\n",
+    expect: '@typescript-eslint/no-restricted-imports',
+  },
+  {
+    name: 'private config must not import private data',
+    filePath: 'private/src/config/x.ts',
+    code: "import type { Builder } from '@uat/src/data/builder';\nexport type B = Builder;\n",
+    expect: '@typescript-eslint/no-restricted-imports',
+  },
+  {
     name: 'unit tests may import @playwright/test',
     filePath: 'tests/unit/x.spec.ts',
     code: "import { test, expect } from '@playwright/test';\ntest('a', () => {\n  expect(1).toBe(1);\n});\n",
