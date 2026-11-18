@@ -90,10 +90,7 @@ Layering, test isolation, the private extension point and the decision log live 
 
 ## Definition of done
 
-- `npm run typecheck`: 0 errors. `npm run lint`: 0 errors and 0 warnings.
-- `npm run verify:lint`, `npm run guard` and `npm run test:unit` pass.
-- With the AUT up, `npm run test:stability` passes with no flaky tests.
-- No `waitForTimeout`, no `any`, no hard-coded secrets or URLs, no layering violation, no private detail in public code.
+The gates every change must pass are listed in [`CLAUDE.md`](CLAUDE.md#definition-of-done).
 
 ## CI
 
