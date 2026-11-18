@@ -114,7 +114,7 @@ const cases = [
   {
     name: 'private api may import private config',
     filePath: 'private/src/api/x.ts',
-    code: "import { requireVar } from '@uat/src/config/uat-env';\nexport const r = requireVar;\n",
+    code: "import type { UatDbConfig } from '@uat/src/config/uat-env';\nexport type C = UatDbConfig;\n",
     expect: null,
   },
   {
@@ -152,8 +152,8 @@ const cases = [
 const eslint = new ESLint();
 let failed = 0;
 
-for (const c of cases) {
-  const filePath = join(dirname(c.filePath), basename(c.filePath).replace(/^x/, '__verify_lint__'));
+for (const [index, c] of cases.entries()) {
+  const filePath = join(dirname(c.filePath), basename(c.filePath).replace(/^x/, `__verify_lint_${String(index)}__`));
   const createdDir = mkdirSync(dirname(filePath), { recursive: true });
   let errors;
   try {
