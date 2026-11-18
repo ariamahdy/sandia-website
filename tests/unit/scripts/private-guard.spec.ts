@@ -101,18 +101,18 @@ test('without an env file the password check is skipped with a note', () => {
 test('every password key of the env is guarded, not only AUTH_PASSWORD', () => {
   const repo = makeRepo();
   const dbPassword = 'Invented-Db-55';
-  repo.write('.env', `AUTH_PASSWORD=${password}\nUAT_OTP_DB_PASSWORD=${dbPassword}\nUAT_CONSENT_DB_PASSWORD=short\n`);
+  repo.write('.env', `AUTH_PASSWORD=${password}\nFIRST_DB_PASSWORD=${dbPassword}\nSECOND_DB_PASSWORD=short\n`);
   repo.commit('src/db.ts', `export const p = '${dbPassword}';\n`);
   const { status, out } = run(repo.dir);
 
   expect(status).toBe(1);
-  expect(out).toContain('src/db.ts: adds the UAT_OTP_DB_PASSWORD value');
+  expect(out).toContain('src/db.ts: adds the FIRST_DB_PASSWORD value');
   expect(out).not.toContain(dbPassword);
 });
 
 test('a password key shorter than 6 characters is skipped, the others still checked', () => {
   const repo = makeRepo();
-  repo.write('.env', `AUTH_PASSWORD=${password}\nUAT_CONSENT_DB_PASSWORD=short\n`);
+  repo.write('.env', `AUTH_PASSWORD=${password}\nSECOND_DB_PASSWORD=short\n`);
   repo.commit('src/db.ts', "export const p = 'short';\n");
 
   expect(run(repo.dir).status).toBe(0);
