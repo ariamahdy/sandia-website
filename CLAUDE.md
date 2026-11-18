@@ -28,7 +28,7 @@ Act as a strict senior QA automation architect. Challenge weak designs; do not j
 ## Rules (apply to every change; detail in `docs/ARCHITECTURE.md`)
 - Layering, no cycles: `config <- utils <- data <- api/components <- pages <- fixtures <- tests` (core and `private/`, D11, D24).
 - Page objects: locators, `verify*`, input and atomic actions only; no business flows. Pages compose components; components take a root `Locator`.
-- Inject pages/components/clients via fixtures; never `new` them in tests. Core tests import `test`/`expect` from `@fixtures/conduit`, private tests from their private fixtures under `@uat/src/fixtures/`; unit tests import `@playwright/test`. No flow helpers shared between test files (D13).
+- Inject pages/components/clients via fixtures; never `new` them in tests. Core tests import `test`/`expect` from `@fixtures/conduit`, private tests from their private fixtures under `@uat/src/fixtures/`; unit tests import `@playwright/test`. Shared openings and flows: `beforeEach` within a file, a `*-flow.ts` under `tests/` across files, never a fixture or a `src/` helper (D13).
 - Tests call actions one by one, each wrapped in `test.step('<label>')` (review).
 - Locator priority and XPath/CSS reasons: ARCHITECTURE "Layering".
 - Web-first assertions only. Never `waitForTimeout` or manual sleeps. Never fix flakiness with timeouts or more retries (the one exception is D18).
