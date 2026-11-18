@@ -57,6 +57,7 @@ Act as a strict senior QA automation architect. Challenge weak designs; do not j
 - No `waitForTimeout`, no `any`, no hard-coded secrets or URLs, no layering violation, no private detail in public code.
 - Every gate's output is read, not assumed.
 - A change to `eslint.config.ts`, `scripts/`, `tsconfig.json`, `playwright.config.ts` or `src/config` also passes the CI quality steps in a clean worktree without `private/` (D25).
+- A change in `private/` passes its pre-commit (typecheck, lint, cspell, `npm run test:uat:unit`; D12) and pre-push (`scripts/private-guard.mjs`; D22). `test:stability` does not apply; give the owner `npm run test:uat` (and `npm run test:uat:mutating` for `@mutating` tests) and never report the run as passed until they confirm it.
 
 ## Environment
 - Docker only on the personal laptop (macOS). The Conduit API/E2E suites and `test:stability` need it; typecheck, lint and unit tests run without it.
