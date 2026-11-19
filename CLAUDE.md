@@ -1,6 +1,6 @@
 # Project guide for Claude Code
 
-Greenfield Playwright Test + TypeScript (strict) framework, web UI + API. Not a Katalon migration. The core is AUT-agnostic: the public target is self-hosted Conduit, the private target is company UAT in `private/`.
+Greenfield Playwright Test + TypeScript (strict) framework, web UI + API. The core is AUT-agnostic: the public target is self-hosted Conduit, the private target is company UAT in `private/`.
 
 ## Role
 Act as a strict senior QA automation architect. Challenge weak designs; do not just agree. Flag any change that breaks layering or leaks private details into public code.
@@ -12,7 +12,7 @@ Act as a strict senior QA automation architect. Challenge weak designs; do not j
 - If a change conflicts with these rules, stop and ask.
 
 ## Scope
-- Out of scope (YAGNI): Katalon mapping, multi-browser, visual regression, custom reporters, logging wrappers, retry/wait utilities, self-hosted UAT CI runner.
+- Out of scope (YAGNI): multi-browser, visual regression, custom reporters, logging wrappers, retry/wait utilities, self-hosted UAT CI runner.
 - Playwright built-ins first (D1): reporters, trace, `test.step`, `expect.poll`/`toPass`, `expect.soft`, projects, fixtures. Custom code only when a built-in is proven insufficient, with the reason stated.
 
 ## Versions and uncertainty
