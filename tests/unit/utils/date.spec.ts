@@ -5,7 +5,6 @@ import {
   isoDate,
   indonesianMonthName,
   lastDayOf,
-  monthLabel,
   previousMonth,
   toIsoMonth,
   yearMonthOf,
@@ -35,11 +34,6 @@ test('firstDayOf and lastDayOf give ISO dates of the month', () => {
 test('lastDayOf handles a leap February', () => {
   expect(lastDayOf({ year: 2028, month: 2 })).toBe('2028-02-29');
   expect(lastDayOf({ year: 2026, month: 2 })).toBe('2026-02-28');
-});
-
-test('monthLabel is the three-letter English name', () => {
-  expect(monthLabel({ year: 2026, month: 1 })).toBe('Jan');
-  expect(monthLabel({ year: 2026, month: 12 })).toBe('Dec');
 });
 
 test('indonesianMonthName is the full Indonesian name in uppercase', () => {

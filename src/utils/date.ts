@@ -14,9 +14,6 @@ export const firstDayOf = (ym: YearMonth): string => `${toIsoMonth(ym)}-01`;
 export const lastDayOf = (ym: YearMonth): string =>
   `${toIsoMonth(ym)}-${pad(new Date(ym.year, ym.month, 0).getDate())}`;
 
-export const monthLabel = ({ year, month }: YearMonth): string =>
-  new Date(year, month - 1, 1).toLocaleString('en-US', { month: 'short' });
-
 export const indonesianMonthName = ({ year, month }: YearMonth): string =>
   new Date(year, month - 1, 1).toLocaleString('id-ID', { month: 'long' }).toUpperCase();
 
