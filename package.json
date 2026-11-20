@@ -34,7 +34,7 @@
     "eslint": "10.13.0",
     "eslint-plugin-playwright": "2.12.2",
     "jiti": "2.7.0",
-    "lint-staged": "17.6.0",
+    "lint-staged": "17.6.1",
     "mssql": "12.7.14",
     "simple-git-hooks": "2.14.0",
     "typescript": "6.0.3",
