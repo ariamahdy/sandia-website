@@ -50,3 +50,36 @@ export const maskSnapshot = (text) => {
   });
   return { text: lines.join(''), snapshots, masked };
 };
+
+const minEnvLength = 3;
+const publicEnvKeys = new Set(['AUT']);
+const publicEnvValue = /^(true|false)$/i;
+
+const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const envMarkers = (env) => {
+  const markers = new Map();
+  for (const [key, raw] of Object.entries(env)) {
+    const value = raw.trim();
+    if (publicEnvKeys.has(key) || publicEnvValue.test(value)) continue;
+    const parts = value.split(' - ');
+    const entries = [[value, `<env:${key}>`], ...(parts.length > 1 ? parts.map((part, index) => [part.trim(), `<env:${key}#${String(index + 1)}>`]) : [])];
+    for (const [text, marker] of entries) {
+      if (text.length >= minEnvLength && !markers.has(text)) markers.set(text, marker);
+    }
+  }
+  return markers;
+};
+
+export const maskEnvValues = (text, env) => {
+  const markers = envMarkers(env);
+  if (markers.size === 0) return { text, masked: 0 };
+  const values = [...markers.keys()].sort((a, b) => b.length - a.length).map(escapeRegExp);
+  const pattern = new RegExp(`(?<![A-Za-z0-9])(?:${values.join('|')})(?![A-Za-z0-9])`, 'g');
+  let masked = 0;
+  const result = text.replace(pattern, (value) => {
+    masked += 1;
+    return markers.get(value) ?? value;
+  });
+  return { text: result, masked };
+};
